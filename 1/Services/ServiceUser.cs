@@ -72,6 +72,20 @@ namespace _1.Services
                 return _db.Users.ToList();
             }
 
+            // Метод для получения всех пользователей с пагинацией и преобразованием в ShortUser
+            public List<ShortUser> GetAllShortUsers(int skip, int take)
+            {
+                return _db.Users
+                    .Skip(skip)  
+                    .Take(take)  
+                    .Select(u => new ShortUser  // Преобразуем User в ShortUser
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        DateOfBirth = u.DateOfBirth
+                    })
+                    .ToList();
+            }
             public List<User> SearchUsersMoreAge(int age)
             {
                 return _db.Users.Where(u => u.Age > age).ToList();

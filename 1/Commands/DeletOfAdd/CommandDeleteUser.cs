@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using static _1.Services.ServiceUser;
 using System.Windows.Input;
 
-namespace _1.Commands
+namespace _1.Commands.DeletOfAdd
 {
     public class CommandDeleteUser : ICommand
     {

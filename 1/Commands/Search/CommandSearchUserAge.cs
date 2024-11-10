@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _1.Models;
 using static _1.Services.ServiceUser;
 
-namespace _1.Commands
+namespace _1.Commands.Search
 {
     public class CommandSearchUserAge : ICommand
     {

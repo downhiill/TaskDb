@@ -6,17 +6,10 @@ using System.Threading.Tasks;
 
 namespace _1.Models
 {
-    public class User
+    public class ShortUser
     {
         public int Id { get; set; }
         public string Name { get; set; }
-
-        public int Age { get; set; }
-        
-
-        public DateTime DateCreate { get; set; }
-        public decimal Wages { get; set; }
-        public bool Active { get; set; }
         public DateTime? DateOfBirth { get; set; }
     }
 }

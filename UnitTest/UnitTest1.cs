@@ -1,6 +1,6 @@
 using Moq;
 using Xunit;
-using _1.Services;
+using _1.Services;  // Пространство имен, где находится ServiceUsers
 using _1.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -10,30 +10,39 @@ namespace _1.Tests
 {
     public class ServiceUsersTests
     {
-        private readonly Mock<ApplicationContext> _mockDbContext;
-        private readonly ServiceUser.ServiceUsers _serviceUsers;
+        private readonly ApplicationContext _dbContext;
+        private readonly ServiceUsers _serviceUsers;
 
         public ServiceUsersTests()
         {
-            _mockDbContext = new Mock<ApplicationContext>();
-            _serviceUsers = new ServiceUser.ServiceUsers(); // Здесь мы предполагаем, что контекст используется внутри сервиса напрямую
+            // Настройка In-Memory базы данных
+            var options = new DbContextOptionsBuilder<ApplicationContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
+
+            // Создаем реальный контекст с In-Memory базой данных
+            _dbContext = new ApplicationContext(options);
+
+            // Создаем сервис с реальным контекстом
+            _serviceUsers = new ServiceUsers(_dbContext);  // Используем класс из правильного пространства имен
         }
 
         [Fact]
-        public void Add_ShouldAddUser()
-        {
-            // Arrange
-            var user = new User { Id = 1, Name = "John", Age = 30 };
-            var dbSetMock = new Mock<DbSet<User>>();
-            _mockDbContext.Setup(db => db.Users).Returns(dbSetMock.Object);
+            public void Add_ShouldAddUser()
+            {
+                // Arrange
+                var user = new User { Id = 1, Name = "John", Age = 30 };
 
-            // Act
-            _serviceUsers.Add(user);
+                // Act
+                _serviceUsers.Add(user);
+                _dbContext.SaveChanges();
 
-            // Assert
-            dbSetMock.Verify(d => d.Add(It.Is<User>(u => u.Id == user.Id && u.Name == user.Name && u.Age == user.Age)), Times.Once);
-            _mockDbContext.Verify(db => db.SaveChanges(), Times.Once);
-        }
+                // Assert
+                var addedUser = _dbContext.Users.FirstOrDefault(u => u.Id == user.Id);
+                Assert.NotNull(addedUser);
+                Assert.Equal(user.Name, addedUser.Name);
+                Assert.Equal(user.Age, addedUser.Age);
+            }
 
         [Fact]
         public void EditName_ShouldEditUserName()

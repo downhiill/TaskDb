@@ -5,21 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using static _1.Services.ServiceUser;
 using System.Windows.Input;
+using _1.Models;
 
-namespace _1.Commands
+namespace _1.Commands.Search
 {
-    public class CommandShowAllUsers : ICommand
+    public class CommandSearchUsers : ICommand
     {
         private readonly ServiceUsers _service;
 
-        public CommandShowAllUsers(ServiceUsers service)
+        public CommandSearchUsers(ServiceUsers service)
         {
             _service = service;
         }
-        public string Name => "Вывод всех пользователей ";
+        public string Name => "Поиск по имени";
         public void Execute()
         {
-            var users = _service.GetAllUsers();
+            Console.Write("Введите часть имени пользователя для поиска: ");
+            string term = Console.ReadLine();
+
+            var users = _service.SearchUsers(term);
 
             if (users.Count > 0)
             {

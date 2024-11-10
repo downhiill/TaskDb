@@ -4,27 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static _1.Services.ServiceUser;
-using System.Windows.Input;
 
-namespace _1.Commands
+namespace _1.Commands.Edit
 {
-    public class CommandEditUser : ICommand
+    internal class CommandEditAge
     {
         private readonly ServiceUsers _service;
 
-        public CommandEditUser(ServiceUsers service)
+        public CommandEditAge(ServiceUsers service)
         {
             _service = service;
         }
-        public string Name => "Изменить данные";
+        public string Name => "Изменить возраст";
         public void Execute()
         {
             Console.Write("Введите ID пользователя: ");
             int userId = int.Parse(Console.ReadLine());
-            Console.Write("Введите новое имя пользователя: ");
-            string name = Console.ReadLine();
+            Console.Write("Введите новый возраст пользователя: ");
+            int age = int.Parse(Console.ReadLine());
 
-            _service.EditName(userId, name);
+            _service.EditAge(userId, age);
             Console.WriteLine("Имя пользователя изменено.");
         }
     }

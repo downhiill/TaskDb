@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace _1.Models
 {
@@ -11,16 +8,24 @@ namespace _1.Models
     {
         public DbSet<User> Users { get; set; }
 
+        private readonly IConfiguration _configuration;
+
         public ApplicationContext()
         {
+            // Настраиваем конфигурацию для чтения appsettings.json
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+            _configuration = builder.Build();
+
             Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-UB9320I;Database=person;Trusted_Connection=True;Encrypt=False;");
-
+            // Извлекаем строку подключения из конфигурации
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
         }
-
     }
 }
