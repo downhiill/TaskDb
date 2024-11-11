@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using _1.Models;
+using _1.Models.Interface;
 using static _1.Services.ServiceUser;
 
-namespace _1.Commands
+namespace _1.Commands.Exit
 {
     public class CommandExit : ICommand
     {

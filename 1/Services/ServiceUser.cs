@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using _1.Models;
+using _1.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace _1.Services
@@ -45,6 +46,32 @@ namespace _1.Services
                 if (user != null)
                 {
                     user.Age = age;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    Console.WriteLine("Пользователь не найден.");
+                }
+            }
+            public void EditWages(int userId, decimal wages)
+            {
+                var user = _db.Users.Find(userId);
+                if (user != null)
+                {
+                    user.Wages = wages;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    Console.WriteLine("Пользователь не найден.");
+                }
+            }
+            public void EditDateOfBirth(int userId, DateTime dateOfBirth)
+            {
+                var user = _db.Users.Find(userId);
+                if (user != null)
+                {
+                    user.DateOfBirth = dateOfBirth;
                     _db.SaveChanges();
                 }
                 else

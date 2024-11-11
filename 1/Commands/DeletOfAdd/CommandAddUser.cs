@@ -25,6 +25,8 @@ namespace _1.Commands.DeletOfAdd
         {
             Console.Write("Введите имя пользователя: ");
             string name = Console.ReadLine();
+            Console.Write("Введите фамилию пользователя: ");
+            string secondName = Console.ReadLine();
             Console.Write("Введите возраст пользователя: ");
             int age = int.Parse(Console.ReadLine());
             Console.WriteLine("Введите дату рождения:");
@@ -32,7 +34,7 @@ namespace _1.Commands.DeletOfAdd
             Console.WriteLine("Введите З/п:");
             decimal wages = decimal.Parse(Console.ReadLine());
 
-            var user = new User { Name = name, Age = age, Wages = wages, DateOfBirth = dateOfbirth };
+            var user = new User { Name = name, SecondName = secondName, Age = age, Wages = wages, DateOfBirth = dateOfbirth };
             _service.Add(user);
 
             Console.WriteLine("Пользователь добавлен.");

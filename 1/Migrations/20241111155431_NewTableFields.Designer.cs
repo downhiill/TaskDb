@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using _1.Models;
+using _1.Models.Context;
 
 #nullable disable
 
 namespace _1.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241110201839_AddNewFieldsToUser")]
-    partial class AddNewFieldsToUser
+    [Migration("20241111155431_NewTableFields")]
+    partial class NewTableFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,12 +40,25 @@ namespace _1.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("nvarchar(max)")
+                        .HasComputedColumnSql("[Name] + ' ' + [SecondName]");
+
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("SecondName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

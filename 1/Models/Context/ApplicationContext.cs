@@ -7,6 +7,7 @@ namespace _1.Models
     internal class ApplicationContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         private readonly IConfiguration _configuration;
 
@@ -26,6 +27,21 @@ namespace _1.Models
             // Извлекаем строку подключения из конфигурации
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connectionString);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new UserConfiguration()); // Применение конфигурации для User
+            modelBuilder.ApplyConfiguration(new RoleConfiguration()); // Применение конфигурации для Role
+            // Устанавливаем значение по умолчанию для поля DateCreate
+            modelBuilder.Entity<User>()
+                .Property(u => u.DateCreate)
+                .HasDefaultValueSql("GETDATE()");
+
+            // Настраиваем вычисляемое поле FullName
+            modelBuilder.Entity<User>()
+                .Property(u => u.FullName)
+                .HasComputedColumnSql("[Name] + ' ' + [SecondName]");
         }
     }
 }

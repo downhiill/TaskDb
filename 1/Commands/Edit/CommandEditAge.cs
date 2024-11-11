@@ -7,7 +7,7 @@ using static _1.Services.ServiceUser;
 
 namespace _1.Commands.Edit
 {
-    internal class CommandEditAge
+    internal class CommandEditAge: ICommand
     {
         private readonly ServiceUsers _service;
 
@@ -24,7 +24,7 @@ namespace _1.Commands.Edit
             int age = int.Parse(Console.ReadLine());
 
             _service.EditAge(userId, age);
-            Console.WriteLine("Имя пользователя изменено.");
+            Console.WriteLine("Возраст пользователя изменен.");
         }
     }
 }
