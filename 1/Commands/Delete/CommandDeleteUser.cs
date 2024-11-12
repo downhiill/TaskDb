@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static _1.Services.ServiceUser;
-using System.Windows.Input;
 
-namespace _1.Commands.DeletOfAdd
+using static _1.Services.ServiceUser;
+using _1.Models.Interface;
+
+namespace _1.Commands.Delete
 {
     public class CommandDeleteUser : ICommand
     {

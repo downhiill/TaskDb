@@ -1,10 +1,11 @@
-﻿using _1.Services;
+﻿using _1.Models.Interface;
+using _1.Services;
 using System;
 using System.Linq;
 using System.Reflection;
 using static _1.Services.ServiceUser;
 
-namespace _1
+namespace _1.Models
 {
     public class App
     {

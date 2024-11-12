@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using _1.Models;
+using _1.Models.Context;
 using _1.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +23,16 @@ namespace _1.Services
             public void Add(User user)
             {
                 _db.Users.Add(user);
+                _db.SaveChanges();
+            }
+            public void AddProfession(string name)
+            {
+                var profession = new Profession
+                {
+                    Name = name
+                };
+
+                _db.Professions.Add(profession);
                 _db.SaveChanges();
             }
 
@@ -79,6 +89,19 @@ namespace _1.Services
                     Console.WriteLine("Пользователь не найден.");
                 }
             }
+            public void EditProfessionUser(int userId, int? professionId)
+            {
+                var user = _db.Users.Find(userId);
+                if (user != null)
+                {
+                    user.ProfessionId = professionId;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    Console.WriteLine("Профессия не найдена не найден.");
+                }
+            }
 
             public void Delete(int userId)
             {
@@ -91,6 +114,20 @@ namespace _1.Services
                 else
                 {
                     Console.WriteLine("Пользователь не найден.");
+                }
+            }
+
+            public void DeleteProfession(int professionId)
+            {
+                var profession = _db.Professions.Find(professionId);
+                if(profession != null)
+                {
+                    _db.Professions.Remove(profession);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    Console.WriteLine("Профессия не найдена.");
                 }
             }
 
@@ -113,6 +150,28 @@ namespace _1.Services
                     })
                     .ToList();
             }
+            public List<ModelUserProfession> GetAllProfessionsUsers()
+            {
+                return _db.Users
+                    .Include(u => u.Profession)
+                    .Select(u => new ModelUserProfession  
+                    {
+                        UserName = u.Name,
+                        ProfessionName = u.Profession.Name
+                    })
+                    .ToList();
+            }
+            public List<ModelProfessionStats> GetAllProfessionsStats()
+            {
+                return _db.Professions
+                    .Select(p => new ModelProfessionStats
+                    {
+                        Name = p.Name,
+                        Count = p.Users.Count
+                    })
+                    .ToList();
+            }
+
             public List<User> SearchUsersMoreAge(int age)
             {
                 return _db.Users.Where(u => u.Age > age).ToList();

@@ -1,4 +1,5 @@
-﻿using static _1.Services.ServiceUser;
+﻿using _1.Models.Interface;
+using static _1.Services.ServiceUser;
 
 namespace _1.Commands.ShowAll
 {

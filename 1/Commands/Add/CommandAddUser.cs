@@ -1,11 +1,12 @@
-﻿using _1.Models;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Windows.Input;
+using _1.Models.Entities;
+using _1.Models.Interface;
 using static _1.Services.ServiceUser;
 
 namespace _1.Commands.DeletOfAdd

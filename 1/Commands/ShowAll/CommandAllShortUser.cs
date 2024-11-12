@@ -1,8 +1,9 @@
 ﻿using _1.Services;
-using _1.Models;
 using System;
 using System.Collections.Generic;
 using static _1.Services.ServiceUser;
+using _1.Models.Entities;
+using _1.Models.Interface;
 
 namespace _1.Commands.ShowAll
 {

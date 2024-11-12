@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static _1.Services.ServiceUser;
-using System.Windows.Input;
+using _1.Models.Interface;
 
 namespace _1.Commands.Edit
 {

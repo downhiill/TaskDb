@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _1.Models
+namespace _1.Models.Entities
 {
     public class User
     {
@@ -19,6 +19,8 @@ namespace _1.Models
         public string FullName { get; set; }
         public int RoleId { get; set; }
         public Role Role { get; set; }
+        public int? ProfessionId {  get; set; }
+        public Profession Profession { get; set; }
 
     }
 }

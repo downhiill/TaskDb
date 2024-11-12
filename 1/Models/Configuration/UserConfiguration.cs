@@ -1,17 +1,18 @@
-﻿using _1.Models;
+﻿using _1.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _1
+namespace _1.Models.Configuration
 {
-    class UserConfiguration: IEntityTypeConfiguration<User>
+    class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public void Configure(EntityTypeBuilder<User> builder) 
+        public void Configure(EntityTypeBuilder<User> builder)
         {
             // Настройка поля Name: обязательное и максимальная длина 30 символов
             builder.Property(u => u.Name)
@@ -21,6 +22,13 @@ namespace _1
             // Настройка поля DateOfBirth: тип данных datetime2
             builder.Property(u => u.DateOfBirth)
                 .HasColumnType("datetime2");
+
+            builder.Property(u => u.DateCreate)
+                .HasDefaultValueSql("GETDATE()");
+
+            // Настраиваем вычисляемое поле FullName
+            builder.Property(u => u.FullName)
+                .HasComputedColumnSql("[Name] + ' ' + [SecondName]");
 
         }
     }

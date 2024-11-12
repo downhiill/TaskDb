@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace _1.Models.Entities
 {
-    public class ShortUser
+    public class ModelUserProfession
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public string UserName { get; set; }
+        public string ProfessionName { get; set; }
     }
 }
