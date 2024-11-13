@@ -39,6 +39,10 @@ namespace _1.Services
                         {
                             services.AddScoped<ServiceRoles>();
                         }
+                        else if (parameter.ParameterType == typeof(ServiceProfession))
+                        {
+                            services.AddScoped<ServiceProfession>();
+                        }
                     }
                 }
 
