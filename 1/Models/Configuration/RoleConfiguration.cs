@@ -9,19 +9,19 @@ using System.Threading.Tasks;
 
 namespace _1.Models.Configuration
 {
-    public class RoleConfiguration : IEntityTypeConfiguration<Role>
+    public class RoleConfiguration : IEntityTypeConfiguration<Roles>
     {
-        public void Configure(EntityTypeBuilder<Role> builder)
+        public void Configure(EntityTypeBuilder<Roles> builder)
         {
             builder.Property(r => r.Name)
                 .IsRequired()
                 .HasMaxLength(30);
 
-            // Добавление начальных данных
+            // Инициализация данных для таблицы Roles
             builder.HasData(
-                new Role { Id = 1, Type = Role.EnumTypeRoles.User, Name = "Пользователь" },
-                new Role { Id = 2, Type = Role.EnumTypeRoles.Guest, Name = "Гость" },
-                new Role { Id = 3, Type = Role.EnumTypeRoles.Admin, Name = "Администратор" }
+                new Roles { Id = EnumTypeRoles.User, Name = "Пользователь" },
+                new Roles { Id = EnumTypeRoles.Admin, Name = "Админ" },
+                new Roles { Id = EnumTypeRoles.Guest, Name = "Гость" }
             );
         }
     }

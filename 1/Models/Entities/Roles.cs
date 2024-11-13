@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace _1.Models.Entities
 {
-    public class Profession
+    public class Roles
     {
-        public int Id { get; set; }
+        public EnumTypeRoles Id { get; set; }
         public string Name { get; set; }
-
-        public List<User> Users { get; set; }
+        public List<RolesUsers> Users { get; set; }
     }
 }

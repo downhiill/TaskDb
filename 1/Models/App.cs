@@ -1,24 +1,23 @@
 ﻿using _1.Models.Interface;
-using _1.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Reflection;
-using static _1.Services.ServiceUser;
 
 namespace _1.Models
 {
     public class App
     {
-        private readonly ServiceUsers _service;
+        private readonly IServiceProvider _serviceProvider;
 
-        public App()
+        public App(IServiceProvider serviceProvider)
         {
-            _service = new ServiceUsers();
+            _serviceProvider = serviceProvider;
         }
 
         public void Run()
         {
-            // Получаем все команды, которые реализуют интерфейс ICommand
+            // Получаем все типы команд, которые реализуют интерфейс ICommand
             var commandTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(t => typeof(ICommand).IsAssignableFrom(t) && !t.IsInterface)
@@ -33,7 +32,7 @@ namespace _1.Models
                 for (int i = 0; i < commandTypes.Count; i++)
                 {
                     var commandType = commandTypes[i];
-                    var command = (ICommand)Activator.CreateInstance(commandType, _service);
+                    var command = (ICommand)_serviceProvider.GetRequiredService(commandType); // Разрешаем команду через DI
                     Console.WriteLine($"{i + 1}. {command.Name}");
                 }
 
@@ -43,7 +42,7 @@ namespace _1.Models
                 if (int.TryParse(choice, out int index) && index >= 1 && index <= commandTypes.Count)
                 {
                     var commandType = commandTypes[index - 1];
-                    var command = (ICommand)Activator.CreateInstance(commandType, _service);
+                    var command = (ICommand)_serviceProvider.GetRequiredService(commandType); // Разрешаем команду через DI
                     command.Execute();
                 }
                 else

@@ -17,10 +17,10 @@ namespace _1.Models.Entities
         public bool Active { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string FullName { get; set; }
-        public int RoleId { get; set; }
-        public Role Role { get; set; }
         public int? ProfessionId {  get; set; }
         public Profession Profession { get; set; }
+
+        public List<RolesUsers> Roles { get; set; }
 
     }
 }

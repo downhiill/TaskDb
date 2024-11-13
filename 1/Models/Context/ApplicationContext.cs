@@ -9,7 +9,8 @@ namespace _1.Models.Context
     internal class ApplicationContext : DbContext
     {
         public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        public DbSet<Roles> Roles { get; set; }
+        public DbSet<RolesUsers> RolesUsers { get; set; }
         public DbSet<Profession> Professions { get; set; }
 
         private readonly IConfiguration _configuration;
@@ -35,7 +36,8 @@ namespace _1.Models.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration()); 
-            modelBuilder.ApplyConfiguration(new RoleConfiguration()); 
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new RolesUserConfiguration());
             modelBuilder.ApplyConfiguration(new ProfessionConfiguration());
         }
     }
