@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _1.Models.Entities
+namespace _1.Models.Entities.Short
 {
-    public class ShortUserProfessionRole
+    public class ShortUserRoles
     {
         public ShortUser User { get; set; }
-        public ShortRole Role { get; set; }
-        public string ProfessionName { get; set; }
+        public List<ShortRole> Roles { get; set; }
     }
 }

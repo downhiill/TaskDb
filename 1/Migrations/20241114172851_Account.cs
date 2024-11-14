@@ -5,7 +5,7 @@
 namespace _1.Migrations
 {
     /// <inheritdoc />
-    public partial class RoleType : Migration
+    public partial class Account : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using _1.Models.Entities;
+using _1.Models.Entities.Short;
 using _1.Models.Interface;
 using static _1.Services.ServiceUser;
 

@@ -19,8 +19,9 @@ namespace _1.Models.Entities
         public string FullName { get; set; }
         public int? ProfessionId {  get; set; }
         public Profession Profession { get; set; }
-
         public List<RolesUsers> Roles { get; set; }
+        public UserInfo Info { get; set; }
+        public Account Account { get; set; }
 
     }
 }

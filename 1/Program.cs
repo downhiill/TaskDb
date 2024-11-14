@@ -7,6 +7,7 @@ var serviceProvider = new ServiceCollection()
            .AddScoped<ServiceUsers>()           // Регистрируем ServiceUsers
            .AddScoped<ServiceRoles>()           // Регистрируем ServiceRoles
            .AddScoped<ServiceProfession>()      // Регистрируем ServiceProfession
+           .AddScoped<ServiceAccount>()         // Регестрируем ServiceAccount
            .AddScoped<App>()                    // Регистрируем App
            .AddCommands()                       // Регистрируем все команды автоматически
            .BuildServiceProvider();

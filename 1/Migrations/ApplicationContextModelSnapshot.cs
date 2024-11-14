@@ -22,6 +22,24 @@ namespace _1.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("_1.Models.Entities.Account", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Account", (string)null);
+                });
+
             modelBuilder.Entity("_1.Models.Entities.Profession", b =>
                 {
                     b.Property<int>("Id")
@@ -51,7 +69,7 @@ namespace _1.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -133,7 +151,43 @@ namespace _1.Migrations
 
                     b.HasIndex("ProfessionId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.UserInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserInfo", (string)null);
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.Account", b =>
+                {
+                    b.HasOne("_1.Models.Entities.User", "User")
+                        .WithOne("Account")
+                        .HasForeignKey("_1.Models.Entities.Account", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("_1.Models.Entities.RolesUsers", b =>
@@ -165,6 +219,17 @@ namespace _1.Migrations
                     b.Navigation("Profession");
                 });
 
+            modelBuilder.Entity("_1.Models.Entities.UserInfo", b =>
+                {
+                    b.HasOne("_1.Models.Entities.User", "User")
+                        .WithOne("Info")
+                        .HasForeignKey("_1.Models.Entities.UserInfo", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("_1.Models.Entities.Profession", b =>
                 {
                     b.Navigation("Users");
@@ -177,6 +242,12 @@ namespace _1.Migrations
 
             modelBuilder.Entity("_1.Models.Entities.User", b =>
                 {
+                    b.Navigation("Account")
+                        .IsRequired();
+
+                    b.Navigation("Info")
+                        .IsRequired();
+
                     b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618

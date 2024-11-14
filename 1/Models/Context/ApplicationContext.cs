@@ -10,6 +10,8 @@ namespace _1.Models.Context
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Roles> Roles { get; set; }
+        public DbSet<UserInfo> UserInfo { get; set; }
+        public DbSet<Account> Account { get; set; }
         public DbSet<RolesUsers> RolesUsers { get; set; }
         public DbSet<Profession> Professions { get; set; }
 
@@ -39,6 +41,8 @@ namespace _1.Models.Context
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new RolesUserConfiguration());
             modelBuilder.ApplyConfiguration(new ProfessionConfiguration());
+            modelBuilder.ApplyConfiguration(new AccountConfiguration());
+            modelBuilder.ApplyConfiguration(new UserInfoConfiguration());
         }
     }
 }

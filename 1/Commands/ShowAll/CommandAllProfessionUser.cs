@@ -1,4 +1,4 @@
-﻿using _1.Models.Entities;
+﻿using _1.Models.Entities.Short;
 using _1.Models.Interface;
 using System;
 using System.Collections.Generic;

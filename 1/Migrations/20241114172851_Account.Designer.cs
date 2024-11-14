@@ -12,8 +12,8 @@ using _1.Models.Context;
 namespace _1.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20241112103335_ProfessionField")]
-    partial class ProfessionField
+    [Migration("20241114172851_Account")]
+    partial class Account
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,24 @@ namespace _1.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("_1.Models.Entities.Account", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Account");
+                });
 
             modelBuilder.Entity("_1.Models.Entities.Profession", b =>
                 {
@@ -42,21 +60,15 @@ namespace _1.Migrations
                     b.ToTable("Professions", (string)null);
                 });
 
-            modelBuilder.Entity("_1.Models.Entities.Role", b =>
+            modelBuilder.Entity("_1.Models.Entities.Roles", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -65,22 +77,34 @@ namespace _1.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Name = "Пользователь",
-                            Type = 0
+                            Id = 2,
+                            Name = "Пользователь"
                         },
                         new
                         {
-                            Id = 2,
-                            Name = "Гость",
-                            Type = 1
+                            Id = 1,
+                            Name = "Админ"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Администратор",
-                            Type = 2
+                            Name = "Гость"
                         });
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.RolesUsers", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RolesUsers", (string)null);
                 });
 
             modelBuilder.Entity("_1.Models.Entities.User", b =>
@@ -119,9 +143,6 @@ namespace _1.Migrations
                     b.Property<int?>("ProfessionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SecondName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -133,9 +154,62 @@ namespace _1.Migrations
 
                     b.HasIndex("ProfessionId");
 
-                    b.HasIndex("RoleId");
-
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.UserInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateCreate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserInfo");
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.Account", b =>
+                {
+                    b.HasOne("_1.Models.Entities.User", "User")
+                        .WithOne("Account")
+                        .HasForeignKey("_1.Models.Entities.Account", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.RolesUsers", b =>
+                {
+                    b.HasOne("_1.Models.Entities.Roles", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("_1.Models.Entities.User", "User")
+                        .WithMany("Roles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("_1.Models.Entities.User", b =>
@@ -145,15 +219,18 @@ namespace _1.Migrations
                         .HasForeignKey("ProfessionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("_1.Models.Entities.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
+                    b.Navigation("Profession");
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.UserInfo", b =>
+                {
+                    b.HasOne("_1.Models.Entities.User", "User")
+                        .WithOne("Info")
+                        .HasForeignKey("_1.Models.Entities.UserInfo", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Profession");
-
-                    b.Navigation("Role");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("_1.Models.Entities.Profession", b =>
@@ -161,9 +238,20 @@ namespace _1.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("_1.Models.Entities.Role", b =>
+            modelBuilder.Entity("_1.Models.Entities.Roles", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("_1.Models.Entities.User", b =>
+                {
+                    b.Navigation("Account")
+                        .IsRequired();
+
+                    b.Navigation("Info")
+                        .IsRequired();
+
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }
