@@ -4,23 +4,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.Windows.Input;
 using static _1.Services.ServiceUser;
 
 namespace _1.Commands.DeletOfAdd
 {
+    /// <summary>
+    /// Команда для добавления нового пользователя.
+    /// </summary>
     public class CommandAddUser : ICommand
     {
         private readonly ServiceUsers _service;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр команды для добавления пользователя.
+        /// </summary>
+        /// <param name="service">Сервис для работы с пользователями.</param>
         public CommandAddUser(ServiceUsers service)
         {
             _service = service;
         }
 
+        /// <summary>
+        /// Имя команды.
+        /// </summary>
         public string Name => "Добавить пользователя";
 
+        /// <summary>
+        /// Выполняет команду добавления нового пользователя.
+        /// Запрашивает данные у пользователя и добавляет их в систему.
+        /// </summary>
         public void Execute()
         {
             Console.Write("Введите имя пользователя: ");

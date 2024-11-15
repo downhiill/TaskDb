@@ -1,5 +1,6 @@
 ﻿using _1.Commands;
-using _1.Services;
+using _1.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -7,15 +8,33 @@ using static _1.Services.ServiceUser;
 
 namespace _1
 {
+    /// <summary>
+    /// Представляет приложение для взаимодействия с пользователями и выполнением команд.
+    /// </summary>
     public class App
     {
+        private ApplicationContext _dbContext;
         private readonly ServiceUsers _service;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр приложения.
+        /// </summary>
         public App()
         {
-            _service = new ServiceUsers();
+            // Создаем параметры для контекста базы данных
+            var options = new DbContextOptionsBuilder<ApplicationContext>()
+                .Options;
+
+            // Передаем параметры в конструктор ApplicationContext
+            _dbContext = new ApplicationContext(options);
+
+            // Инициализируем сервис пользователей
+            _service = new ServiceUsers(_dbContext);
         }
 
+        /// <summary>
+        /// Запускает приложение и отображает меню для выбора действия.
+        /// </summary>
         public void Run()
         {
             // Получаем все команды, которые реализуют интерфейс ICommand
