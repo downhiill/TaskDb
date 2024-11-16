@@ -4,29 +4,16 @@ using System.IO;
 
 namespace _1.Models
 {
-    internal class ApplicationContext : DbContext
+    public class ApplicationContext : DbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
 
-        private readonly IConfiguration _configuration;
-
-        public ApplicationContext()
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
+             : base(options)
         {
-            // Настраиваем конфигурацию для чтения appsettings.json
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            _configuration = builder.Build();
-
+            // Убедитесь, что база данных создана
             Database.EnsureCreated();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            // Извлекаем строку подключения из конфигурации
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

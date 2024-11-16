@@ -1,4 +1,5 @@
 ﻿using _1.Models;
+using _1.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -19,9 +20,9 @@ namespace _1
 
             // Добавление начальных данных
             builder.HasData(
-                new Role { Id = 1, Type = Role.EnumTypeRoles.User, Name = "Пользователь" },
-                new Role { Id = 2, Type = Role.EnumTypeRoles.Guest, Name = "Гость" },
-                new Role { Id = 3, Type = Role.EnumTypeRoles.Admin, Name = "Администратор" }
+                new Role { Id = 1, Type = EnumTypeRoles.User, Name = "Пользователь" },
+                new Role { Id = 2, Type = EnumTypeRoles.Guest, Name = "Гость" },
+                new Role { Id = 3, Type = EnumTypeRoles.Admin, Name = "Администратор" }
             );
         }
     }

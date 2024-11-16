@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using _1.Models;
-using _1.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace _1.Services
@@ -15,19 +14,21 @@ namespace _1.Services
         {
             private readonly ApplicationContext _db;
 
-            public ServiceUsers()
+            public ServiceUsers(ApplicationContext dbContext)
             {
-                _db = new ApplicationContext();
+                _db = dbContext;
             }
 
             public void Add(User user)
             {
+
                 _db.Users.Add(user);
                 _db.SaveChanges();
             }
 
             public void EditName(int userId, string name)
             {
+
                 var user = _db.Users.Find(userId);
                 if (user != null)
                 {
