@@ -1,4 +1,5 @@
-﻿using _1.Models.Interface;
+﻿using _1.Models.Context;
+using _1.Models.Interface;
 using _1.Services;
 using System;
 using System.Linq;
@@ -9,11 +10,19 @@ namespace _1.Models
 {
     public class App
     {
+        private ApplicationContext _dbContext;
         private readonly ServiceUsers _service;
 
-        public App()
+        /// <summary>
+        /// Инициализирует новый экземпляр приложения.
+        /// </summary>
+        public App(ApplicationContext dbContext)
         {
-            _service = new ServiceUsers();
+            // Инжектируем DbContext через конструктор
+            _dbContext = dbContext;
+
+            // Инициализируем сервис пользователей
+            _service = new ServiceUsers(_dbContext);
         }
 
         public void Run()

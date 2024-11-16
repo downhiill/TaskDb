@@ -15,9 +15,9 @@ namespace _1.Services
         {
             private readonly ApplicationContext _db;
 
-            public ServiceUsers()
+            public ServiceUsers(ApplicationContext dbContext)
             {
-                _db = new ApplicationContext();
+                _db = dbContext;
             }
 
             public void Add(User user)
