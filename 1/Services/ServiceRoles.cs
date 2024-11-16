@@ -8,38 +8,49 @@ using System.Threading.Tasks;
 
 namespace _1.Services
 {
+    /// <summary>
+    /// Сервис для работы с ролями пользователей.
+    /// </summary>
     public class ServiceRoles
     {
         private readonly ApplicationContext _db;
 
-        public ServiceRoles()
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="ServiceRoles"/>.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных для работы с данными.</param>
+        public ServiceRoles(ApplicationContext dbContext)
         {
-            _db = new ApplicationContext();
+            _db = dbContext;
         }
 
-        public void UserAddRole (int userId, EnumTypeRoles role)
+        /// <summary>
+        /// Добавляет роль пользователю.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <param name="role">Роль для добавления пользователю.</param>
+        public void UserAddRole(int userId, EnumTypeRoles role)
         {
-            // Создаем новый объект RolesUsers
             var roleUser = new RolesUsers
             {
                 UserId = userId,
                 RoleId = role
             };
 
-            // Добавляем запись в таблицу RolesUsers
             _db.RolesUsers.Add(roleUser);
             _db.SaveChanges();
         }
 
-        public void UserChangeRole (int userId, List<EnumTypeRoles> roles)
+        /// <summary>
+        /// Меняет роли пользователя.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <param name="roles">Список новых ролей для пользователя.</param>
+        public void UserChangeRole(int userId, List<EnumTypeRoles> roles)
         {
-            // Получаем все текущие роли пользователя
             var existingRoles = _db.RolesUsers.Where(ru => ru.UserId == userId).ToList();
-
-            // Удаляем все текущие роли пользователя
             _db.RolesUsers.RemoveRange(existingRoles);
 
-            // Создаем новые записи для каждой роли в списке `roles` и добавляем их
             var newRoles = roles.Select(role => new RolesUsers
             {
                 UserId = userId,
@@ -50,12 +61,14 @@ namespace _1.Services
             _db.SaveChanges();
         }
 
+        /// <summary>
+        /// Удаляет роль у пользователя.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <param name="role">Роль, которую нужно удалить.</param>
         public void UserRemoveRole(int userId, EnumTypeRoles role)
         {
-            // Находим запись в таблице RolesUsers, где UserId и RoleId соответствуют переданным значениям
             var roleUser = _db.RolesUsers.FirstOrDefault(ru => ru.UserId == userId && ru.RoleId == role);
-
-            // Если такая запись найдена, удаляем её
             if (roleUser != null)
             {
                 _db.RolesUsers.Remove(roleUser);
@@ -67,55 +80,68 @@ namespace _1.Services
             }
         }
 
+        /// <summary>
+        /// Получает список пользователей, имеющих определенную роль.
+        /// </summary>
+        /// <param name="role">Роль, по которой будет выполнен поиск.</param>
+        /// <returns>Список пользователей с указанной ролью.</returns>
         public List<ShortUserRole> GetUsers(EnumTypeRoles role)
         {
-                return _db.RolesUsers
-                    .Where(ru => ru.RoleId == role) // Фильтруем по роли
-                    .Select(ru => new ShortUserRole
+            return _db.RolesUsers
+                .Where(ru => ru.RoleId == role)
+                .Select(ru => new ShortUserRole
+                {
+                    User = new ShortUser
                     {
-                        User = new ShortUser
-                        {
-                            Id = ru.User.Id,
-                            Name = ru.User.Name,
-                            DateOfBirth = ru.User.DateOfBirth
-                        },
-                        Role = new ShortRole
-                        {
-                            Type = ru.Role.Id,  // Предполагается, что Role.Id это EnumTypeRoles
-                            Name = ru.Role.Name
-                        }
-                    }).ToList();        
+                        Id = ru.User.Id,
+                        Name = ru.User.Name,
+                        DateOfBirth = ru.User.DateOfBirth
+                    },
+                    Role = new ShortRole
+                    {
+                        Type = ru.Role.Id,
+                        Name = ru.Role.Name
+                    }
+                }).ToList();
         }
 
+        /// <summary>
+        /// Получает список ролей пользователя.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список ролей для указанного пользователя.</returns>
         public List<Roles> GetRolesUser(int userId)
         {
             return _db.RolesUsers
-            .Where(ru => ru.UserId == userId)  // Фильтруем по userId
-            .Select(ru => ru.Role)  // Получаем роли, связанные с этим пользователем
-            .ToList();  // Преобразуем в список
+                .Where(ru => ru.UserId == userId)
+                .Select(ru => ru.Role)
+                .ToList();
         }
 
+        /// <summary>
+        /// Получает всех пользователей и их роли.
+        /// </summary>
+        /// <returns>Список всех пользователей с их ролями.</returns>
         public List<ShortUserRoles> GetAllUsers()
         {
             return _db.RolesUsers
-                .Where(ru => ru.Role != null)  // Фильтруем записи, чтобы выбрать только тех пользователей, у которых есть роли
-                .GroupBy(ru => ru.UserId)  // Группируем по UserId, чтобы собрать все роли каждого пользователя
+                .Where(ru => ru.Role != null)
+                .GroupBy(ru => ru.UserId)
                 .Select(group => new ShortUserRoles
                 {
                     User = new ShortUser
                     {
-                        Id = group.Key,  // Используем ключ группы (UserId)
-                        Name = group.First().User.Name,  // Имя первого пользователя из группы
-                        DateOfBirth = group.First().User.DateOfBirth  // Дата рождения первого пользователя из группы
+                        Id = group.Key,
+                        Name = group.First().User.Name,
+                        DateOfBirth = group.First().User.DateOfBirth
                     },
                     Roles = group.Select(ru => new ShortRole
                     {
-                        Type = ru.RoleId,  // Преобразуем RoleId в EnumTypeRoles
-                        Name = ru.Role.Name  // Имя роли
-                    }).ToList()  // Собираем список ролей для пользователя
+                        Type = ru.RoleId,
+                        Name = ru.Role.Name
+                    }).ToList()
                 })
-                .ToList();  // Преобразуем в список и возвращаем
+                .ToList();
         }
-
     }
 }

@@ -6,36 +6,52 @@ using System.IO;
 
 namespace _1.Models.Context
 {
-    internal class ApplicationContext : DbContext
+    /// <summary>
+    /// Контекст базы данных для работы с сущностями пользователей, ролей, профессий и связями между ними.
+    /// </summary>
+    public class ApplicationContext : DbContext
     {
+        /// <summary>
+        /// Представление сущности пользователей в базе данных.
+        /// </summary>
         public DbSet<User> Users { get; set; }
+
+        /// <summary>
+        /// Представление сущности ролей в базе данных.
+        /// </summary>
         public DbSet<Roles> Roles { get; set; }
+
+        /// <summary>
+        /// Представление сущности связей между ролями и пользователями.
+        /// </summary>
         public DbSet<RolesUsers> RolesUsers { get; set; }
+
+        /// <summary>
+        /// Представление сущности профессий в базе данных.
+        /// </summary>
         public DbSet<Profession> Professions { get; set; }
 
         private readonly IConfiguration _configuration;
 
-        public ApplicationContext()
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="ApplicationContext"/>.
+        /// </summary>
+        /// <param name="options">Опции контекста базы данных.</param>
+        public ApplicationContext(DbContextOptions<ApplicationContext> options)
+            : base(options)
         {
-            // Настраиваем конфигурацию для чтения appsettings.json
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            _configuration = builder.Build();
-
+            // Убедитесь, что база данных создана, если она не существует
             Database.EnsureCreated();
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            // Извлекаем строку подключения из конфигурации
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
-        }
-
+        /// <summary>
+        /// Настроить модель базы данных при создании контекста.
+        /// </summary>
+        /// <param name="modelBuilder">Объект строителя модели для конфигурации сущностей.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new UserConfiguration()); 
+            // Применение конфигурации для сущностей
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new RolesUserConfiguration());
             modelBuilder.ApplyConfiguration(new ProfessionConfiguration());

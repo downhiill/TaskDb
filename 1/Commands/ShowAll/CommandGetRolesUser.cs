@@ -4,22 +4,37 @@ using _1.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Commands.ShowAll
 {
+    /// <summary>
+    /// Команда для получения всех ролей заданного пользователя.
+    /// </summary>
     public class CommandGetRolesUser : ICommand
     {
         private readonly ServiceRoles _serviceRoles;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="CommandGetRolesUser"/>.
+        /// </summary>
+        /// <param name="serviceRoles">Сервис для работы с ролями пользователей.</param>
         public CommandGetRolesUser(ServiceRoles serviceRoles)
         {
-            _serviceRoles = serviceRoles;
+            _serviceRoles = serviceRoles ?? throw new ArgumentNullException(nameof(serviceRoles), "Сервис ролей не может быть null.");
         }
 
+        /// <summary>
+        /// Имя команды, которое будет отображаться в меню.
+        /// </summary>
         public string Name => "Получаем список всех ролей заданного пользователя";
 
+        /// <summary>
+        /// Выполняет команду, отображающую список ролей для заданного пользователя.
+        /// </summary>
+        /// <remarks>
+        /// Запрашивает у пользователя ID и получает список ролей для пользователя с этим ID.
+        /// Если роли найдены, они выводятся на экран. Если ролей нет, выводится соответствующее сообщение.
+        /// </remarks>
         public void Execute()
         {
             // Запрашиваем у пользователя ID

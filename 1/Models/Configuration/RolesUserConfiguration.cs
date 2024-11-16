@@ -2,33 +2,36 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Models.Configuration
 {
+    /// <summary>
+    /// Конфигурация сущности <see cref="RolesUsers"/> для настройки модели базы данных.
+    /// </summary>
     public class RolesUserConfiguration : IEntityTypeConfiguration<RolesUsers>
     {
+        /// <summary>
+        /// Метод конфигурации для сущности <see cref="RolesUsers"/>.
+        /// </summary>
+        /// <param name="builder">Объект для построения конфигурации сущности.</param>
         public void Configure(EntityTypeBuilder<RolesUsers> builder)
         {
-            // Задаем имя таблицы
+            // Указываем имя таблицы
             builder.ToTable("RolesUsers");
 
-            // Определяем первичный ключ
+            // Определяем составной первичный ключ
             builder.HasKey(ru => new { ru.UserId, ru.RoleId });
 
-            // Настройка внешнего ключа для связи с User
+            // Настройка связи с сущностью User
             builder.HasOne(ru => ru.User)
-                   .WithMany(u => u.Roles)
-                   .HasForeignKey(ru => ru.UserId)
+                   .WithMany(u => u.Roles) // Пользователь может иметь несколько ролей
+                   .HasForeignKey(ru => ru.UserId) // Внешний ключ для связи с таблицей пользователей
                    .OnDelete(DeleteBehavior.Cascade); // Каскадное удаление
 
-            // Настройка внешнего ключа для связи с Roles
+            // Настройка связи с сущностью Role
             builder.HasOne(ru => ru.Role)
-                   .WithMany(r => r.Users)
-                   .HasForeignKey(ru => ru.RoleId)
+                   .WithMany(r => r.Users) // Роль может быть у нескольких пользователей
+                   .HasForeignKey(ru => ru.RoleId) // Внешний ключ для связи с таблицей ролей
                    .OnDelete(DeleteBehavior.Cascade); // Каскадное удаление
         }
     }

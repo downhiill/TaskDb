@@ -4,22 +4,38 @@ using _1.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Commands.ShowAll
 {
+    /// <summary>
+    /// Команда для получения информации о пользователях, их ролях и профессиях.
+    /// </summary>
     public class CommandGetUserProfessionRole : ICommand
     {
         private readonly ServiceProfession _serviceProfession;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="CommandGetUserProfessionRole"/>.
+        /// </summary>
+        /// <param name="serviceProfession">Сервис для работы с профессиями пользователей.</param>
         public CommandGetUserProfessionRole(ServiceProfession serviceProfession)
         {
-            _serviceProfession = serviceProfession;
+            _serviceProfession = serviceProfession ?? throw new ArgumentNullException(nameof(serviceProfession), "Сервис профессий не может быть null.");
         }
 
+        /// <summary>
+        /// Имя команды, которое будет отображаться в меню.
+        /// </summary>
         public string Name => "Получение информации о пользователях, их ролях и профессиях";
 
+        /// <summary>
+        /// Выполняет команду, которая запрашивает профессию и роль у пользователя,
+        /// а затем отображает информацию о пользователях с указанными параметрами.
+        /// </summary>
+        /// <remarks>
+        /// Запрашивает у пользователя название профессии и роль, затем получает список пользователей с заданными параметрами.
+        /// Если такие пользователи найдены, они выводятся на экран. Если таких пользователей нет, выводится сообщение об этом.
+        /// </remarks>
         public void Execute()
         {
             // Запрос названия профессии у пользователя
@@ -53,5 +69,4 @@ namespace _1.Commands.ShowAll
             }
         }
     }
-    
 }

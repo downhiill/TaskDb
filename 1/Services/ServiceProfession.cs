@@ -8,14 +8,28 @@ using System.Threading.Tasks;
 
 namespace _1.Services
 {
+    /// <summary>
+    /// Сервис для работы с профессиями и ролями пользователей.
+    /// </summary>
     public class ServiceProfession
     {
         private readonly ApplicationContext _db;
 
-        public ServiceProfession()
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="ServiceProfession"/>.
+        /// </summary>
+        /// <param name="dbContext">Контекст базы данных для работы с данными.</param>
+        public ServiceProfession(ApplicationContext dbContext)
         {
-            _db = new ApplicationContext();
+            _db = dbContext;
         }
+
+        /// <summary>
+        /// Получает список пользователей с указанной профессией и ролью.
+        /// </summary>
+        /// <param name="nameProfession">Название профессии.</param>
+        /// <param name="role">Роль пользователя.</param>
+        /// <returns>Список пользователей, соответствующих профессии и роли.</returns>
         public List<ShortUserProfessionRole> GetUserProfessionRole(string nameProfession, EnumTypeRoles role)
         {
             return _db.Users
@@ -37,8 +51,5 @@ namespace _1.Services
                 })
                 .ToList();
         }
-
-
-
     }
 }

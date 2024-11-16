@@ -6,15 +6,25 @@ using System.Reflection;
 
 namespace _1.Models
 {
+    /// <summary>
+    /// Класс, представляющий основное приложение, которое управляет запуском команд.
+    /// </summary>
     public class App
     {
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Инициализирует экземпляр приложения с использованием предоставленного контейнера зависимостей.
+        /// </summary>
+        /// <param name="serviceProvider">Контейнер зависимостей.</param>
         public App(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// Запускает приложение, позволяя пользователю выбрать и выполнить команду.
+        /// </summary>
         public void Run()
         {
             // Получаем все типы команд, которые реализуют интерфейс ICommand

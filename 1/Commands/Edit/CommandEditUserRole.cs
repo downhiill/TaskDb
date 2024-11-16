@@ -4,23 +4,37 @@ using _1.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Commands.Edit
 {
+    /// <summary>
+    /// Команда для изменения роли пользователя.
+    /// </summary>
     public class CommandEditUserRole : ICommand
     {
         private readonly ServiceRoles _serviceRoles;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="CommandEditUserRole"/>.
+        /// </summary>
+        /// <param name="serviceRoles">Сервис для работы с ролями пользователей.</param>
         public CommandEditUserRole(ServiceRoles serviceRoles)
         {
-            _serviceRoles = serviceRoles;
+            _serviceRoles = serviceRoles ?? throw new ArgumentNullException(nameof(serviceRoles), "Сервис ролей не может быть null.");
         }
 
+        /// <summary>
+        /// Имя команды, которое будет отображаться в меню.
+        /// </summary>
         public string Name => "Изменить роль у пользователя";
 
-        public void Execute ()
+        /// <summary>
+        /// Выполняет команду изменения роли пользователя.
+        /// </summary>
+        /// <remarks>
+        /// Запрашивает у пользователя ID пользователя и новые роли, а затем вызывает сервис для изменения ролей.
+        /// </remarks>
+        public void Execute()
         {
             // Запрашиваем у пользователя ID пользователя, чьи роли нужно изменить
             Console.WriteLine("Введите ID пользователя, чьи роли нужно изменить:");

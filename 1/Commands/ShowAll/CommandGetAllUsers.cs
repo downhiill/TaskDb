@@ -3,22 +3,37 @@ using _1.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace _1.Commands.ShowAll
 {
+    /// <summary>
+    /// Команда для получения пользователей, у которых есть хотя бы одна роль.
+    /// </summary>
     public class CommandGetAllUsers : ICommand
     {
         private readonly ServiceRoles _serviceRoles;
 
+        /// <summary>
+        /// Инициализирует новый экземпляр <see cref="CommandGetAllUsers"/>.
+        /// </summary>
+        /// <param name="serviceRoles">Сервис для работы с ролями пользователей.</param>
         public CommandGetAllUsers(ServiceRoles serviceRoles)
         {
-            _serviceRoles = serviceRoles;
+            _serviceRoles = serviceRoles ?? throw new ArgumentNullException(nameof(serviceRoles), "Сервис ролей не может быть null.");
         }
 
+        /// <summary>
+        /// Имя команды, которое будет отображаться в меню.
+        /// </summary>
         public string Name => "Получить пользователей у которых есть хотя бы одна роль";
+
+        /// <summary>
+        /// Выполняет команду, отображающую список пользователей с хотя бы одной ролью.
+        /// </summary>
+        /// <remarks>
+        /// Запрашивает сервис для получения списка пользователей с их ролями.
+        /// Если пользователей с ролями нет, выводится соответствующее сообщение.
+        /// </remarks>
         public void Execute()
         {
             // Получаем всех пользователей с хотя бы одной ролью
