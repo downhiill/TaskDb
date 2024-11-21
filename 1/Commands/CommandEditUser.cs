@@ -1,18 +1,18 @@
-﻿using System;
+﻿using Project.IService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static _1.Services.ServiceUser;
 using System.Windows.Input;
 
 namespace _1.Commands
 {
     public class CommandEditUser : ICommand
     {
-        private readonly ServiceUsers _service;
+        private readonly IServiceUsers _service;
 
-        public CommandEditUser(ServiceUsers service)
+        public CommandEditUser(IServiceUsers service)
         {
             _service = service;
         }

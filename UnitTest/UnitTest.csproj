@@ -20,6 +20,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\1\1.csproj" />
+    <ProjectReference Include="..\Project.Data\Project.Data.csproj" />
+    <ProjectReference Include="..\Project.IService\Project.IService.csproj" />
+    <ProjectReference Include="..\Project.Service\Project.Service.csproj" />
   </ItemGroup>
 
   <ItemGroup>

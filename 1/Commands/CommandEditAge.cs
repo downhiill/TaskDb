@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Project.IService;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static _1.Services.ServiceUser;
 
 namespace _1.Commands
 {
     internal class CommandEditAge
     {
-        private readonly ServiceUsers _service;
+        private readonly IServiceUsers _service;
 
-        public CommandEditAge(ServiceUsers service)
+        public CommandEditAge(IServiceUsers service)
         {
             _service = service;
         }

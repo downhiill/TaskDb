@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _1.Models
+namespace Project.Data
 {
-    public class User
+    public class UserDb
     {
         public int Id { get; set; }
         public string Name { get; set; }

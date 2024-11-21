@@ -1,19 +1,40 @@
 ﻿using _1.Commands;
+using Project.Data;  // Для использования ApplicationContext
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;  // Для DI контейнера
 using System;
 using System.Linq;
 using System.Reflection;
-using static _1.Services.ServiceUser;
+using Microsoft.EntityFrameworkCore;
+using Project.IService;
 
 namespace _1
 {
     public class App
     {
-        private readonly ServiceUsers _service;
+        private readonly ServiceUser _service;
 
         public App()
         {
-            _service = new ServiceUsers();
+            // Создаем конфигурацию из appsettings.json
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            IConfiguration configuration = builder.Build();
+
+            // Настроим DI контейнер и передадим конфигурацию
+            var serviceProvider = new ServiceCollection()
+                .AddSingleton(configuration)  // Добавляем конфигурацию в DI
+                .AddDbContext<ApplicationContext>((sp, options) =>
+                    options.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")))
+                .AddScoped<IServiceUsers, ServiceUser>() // Регистрируем ServiceUser как IServiceUsers
+                .BuildServiceProvider();
+
+            // Получаем экземпляр интерфейса IServiceUsers из DI
+            _service = (ServiceUser?)serviceProvider.GetRequiredService<IServiceUsers>();  // Используем интерфейс, а не конкретный класс
         }
+
 
         public void Run()
         {
