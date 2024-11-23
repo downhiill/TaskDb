@@ -8,7 +8,7 @@ namespace Project.IService
 {
     public interface IServiceUsers
     {
-        void Add(UserModel user);
+        int Add(UserModel user);
         void EditName(int userId, string name);
         void EditAge(int userId, int age);
         void Delete(int userId);

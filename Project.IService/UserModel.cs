@@ -1,4 +1,8 @@
-﻿namespace Project.IService
+﻿
+
+using System.ComponentModel.DataAnnotations;
+
+namespace Project.IService
 {
     public class UserModel
     {

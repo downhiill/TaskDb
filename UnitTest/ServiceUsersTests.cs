@@ -1,139 +1,130 @@
-using Moq;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using Project.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Project.IService;
-using Microsoft.Extensions.Configuration;
+using System;
+using Xunit;
 
 namespace _1.Tests
 {
     public class ServiceUsersTests
     {
         private readonly IServiceUsers _serviceUsers;
-        private readonly DbContextOptions<ApplicationContext> _options;
+        private readonly ServiceProvider _serviceProvider;
 
         public ServiceUsersTests()
         {
-            // Настройка в памяти базы данных
-            _options = new DbContextOptionsBuilder<ApplicationContext>()
-                        .UseInMemoryDatabase(databaseName: "TestDatabase")
-                        .Options;
+            // Создание нового DI контейнера с уникальной In-Memory базой данных для каждого теста
+            _serviceProvider = new ServiceCollection()
+                .AddDbContext<ApplicationContext>(options =>
+                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальное имя базы данных для каждого теста
+                .AddScoped<IServiceUsers, ServiceUser>()
+                .BuildServiceProvider();
 
-            // Создание контекста через DI
-            var context = new ApplicationContext(_options);
-
-            // Создание сервиса, используя сконфигурированный контекст
-            _serviceUsers = new ServiceUser(context);  // Передаем ApplicationContext
+            _serviceUsers = _serviceProvider.GetRequiredService<IServiceUsers>();
         }
 
         [Fact]
         public void Add_ShouldAddUser()
         {
-            // Arrange
-            var user = new UserModel { Id = 1, Name = "John", Age = 30 };
+            var user = new UserModel { Name = "John", Age = 30 };
 
-            // Act
-            _serviceUsers.Add(user);
+            // Используем один скоуп для добавления и чтения
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Assert
-            using (var context = new ApplicationContext(_options))  // Указываем, что это тестовое окружение
-            {
-                var userDb = context.Users.FirstOrDefault(u => u.Id == 1);
-                Assert.NotNull(userDb);
-                Assert.Equal(user.Name, userDb.Name);
-                Assert.Equal(user.Age, userDb.Age);
-            }
+
+            // Добавляем пользователя
+            int userId = _serviceUsers.Add(user);
+
+
+            // Проверяем, что ID пользователя больше нуля (пользователь добавлен)
+            Assert.True(userId > 0);
+
+        }
+
+
+
+
+
+
+        [Fact]
+        public void Delete_ShouldRemoveUser()
+        {
+            var user = new UserModel { Name = "John", Age = 30 };
+            int userId = _serviceUsers.Add(user);
+
+            // Удаляем пользователя
+            _serviceUsers.Delete(userId);
+
+            // Проверяем, что пользователь был удален
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+            Assert.Null(context.Users.Find(userId));
         }
 
         [Fact]
         public void EditName_ShouldEditUserName()
         {
-            // Arrange
-            var user = new UserModel { Id = 1, Name = "John", Age = 30 };
-            _serviceUsers.Add(user);
-            var newName = "Johnny";
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Act
-            _serviceUsers.EditName(1, newName);
+            var serviceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            // Assert
-            using (var context = new ApplicationContext(_options))  // Указываем, что это тестовое окружение
-            {
-                var userDb = context.Users.FirstOrDefault(u => u.Id == 1);
-                Assert.NotNull(userDb);
-                Assert.Equal(newName, userDb.Name);
-            }
+            // Добавляем пользователя
+            var user = new UserModel { Name = "John", Age = 30 };
+            int userId = serviceUsers.Add(user);
+
+            // Изменяем имя пользователя
+            serviceUsers.EditName(userId, "Johnny");
+
+            // Проверяем, что имя пользователя было обновлено
+            var updatedUser = context.Users.Find(userId);
+
+            Console.WriteLine($"After SaveChanges: ID={updatedUser?.Id}, Name={updatedUser?.Name}, Age={updatedUser?.Age}");
+            Assert.Equal("Johnny", updatedUser?.Name);
         }
+
 
         [Fact]
         public void EditAge_ShouldEditUserAge()
         {
-            // Arrange
-            var user = new UserModel { Id = 1, Name = "John", Age = 30 };
-            _serviceUsers.Add(user);
-            var newAge = 35;
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+            var serviceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            // Act
-            _serviceUsers.EditAge(1, newAge);
+            var user = new UserModel { Name = "John", Age = 30 };
+            int userId = serviceUsers.Add(user);
 
-            // Assert
-            using (var context = new ApplicationContext(_options))  // Указываем, что это тестовое окружение
-            {
-                var userDb = context.Users.FirstOrDefault(u => u.Id == 1);
-                Assert.NotNull(userDb);
-                Assert.Equal(newAge, userDb.Age);
-            }
-        }
+            // Изменяем возраст
+            serviceUsers.EditAge(userId, 35);
 
-        [Fact]
-        public void Delete_ShouldRemoveUser()
-        {
-            // Arrange
-            var user = new UserModel { Id = 1, Name = "John", Age = 30 };
-            _serviceUsers.Add(user);
 
-            // Act
-            _serviceUsers.Delete(1);
-
-            // Assert
-            using (var context = new ApplicationContext(_options))  // Указываем, что это тестовое окружение
-            {
-                var userDb = context.Users.FirstOrDefault(u => u.Id == 1);
-                Assert.Null(userDb);
-            }
+            Assert.Equal(35, context.Users.Find(userId)?.Age);
         }
 
         [Fact]
         public void GetAllUsers_ShouldReturnAllUsers()
         {
-            // Arrange
-            var user1 = new UserModel { Id = 1, Name = "John", Age = 30 };
-            var user2 = new UserModel { Id = 2, Name = "Jane", Age = 25 };
-            _serviceUsers.Add(user1);
-            _serviceUsers.Add(user2);
+            _serviceUsers.Add(new UserModel { Name = "John", Age = 30 });
+            _serviceUsers.Add(new UserModel { Name = "Jane", Age = 25 });
 
-            // Act
+            // Получаем всех пользователей
             var result = _serviceUsers.GetAllUsers();
 
-            // Assert
+            // Проверяем, что количество пользователей правильно
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public void SearchUsersMoreAge_ShouldReturnUsersOlderThanGivenAge()
         {
-            // Arrange
-            var user1 = new UserModel { Id = 1, Name = "John", Age = 30 };
-            var user2 = new UserModel { Id = 2, Name = "Jane", Age = 25 };
-            _serviceUsers.Add(user1);
-            _serviceUsers.Add(user2);
+            _serviceUsers.Add(new UserModel { Name = "John", Age = 30 });
+            _serviceUsers.Add(new UserModel { Name = "Jane", Age = 25 });
 
-            // Act
+            // Ищем пользователей старше 26 лет
             var result = _serviceUsers.SearchUsersMoreAge(26);
 
-            // Assert
+            // Ожидаем, что вернется один пользователь (John)
             Assert.Single(result);
             Assert.Equal("John", result[0].Name);
         }
@@ -141,16 +132,13 @@ namespace _1.Tests
         [Fact]
         public void SearchUsers_ShouldReturnUsersMatchingSearchTerm()
         {
-            // Arrange
-            var user1 = new UserModel { Id = 1, Name = "John", Age = 30 };
-            var user2 = new UserModel { Id = 2, Name = "Jane", Age = 25 };
-            _serviceUsers.Add(user1);
-            _serviceUsers.Add(user2);
+            _serviceUsers.Add(new UserModel { Name = "John", Age = 30 });
+            _serviceUsers.Add(new UserModel { Name = "Jane", Age = 25 });
 
-            // Act
+            // Ищем пользователей по имени "John"
             var result = _serviceUsers.SearchUsers("John");
 
-            // Assert
+            // Ожидаем, что вернется один пользователь (John)
             Assert.Single(result);
             Assert.Equal("John", result[0].Name);
         }

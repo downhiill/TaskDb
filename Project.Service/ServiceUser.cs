@@ -11,7 +11,7 @@ public class ServiceUser : IServiceUsers
         _context = context;
     }
 
-    public void Add(UserModel user)
+    public int Add(UserModel user)
     {
         var userDb = new UserDb
         {
@@ -21,11 +21,19 @@ public class ServiceUser : IServiceUsers
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
+        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}");
+
+        // Проверка сохранения перед возвратом Id
+        var savedUser = _context.Users.Find(userDb.Id);
+        Console.WriteLine($"Saved user after save: {savedUser?.Name}");
+        return userDb.Id;
     }
+
+
 
     public void EditName(int id, string name)
     {
-        var userDb = _context.Users.Find(id);
+        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
         if (userDb != null)
         {
             userDb.Name = name;
@@ -35,7 +43,7 @@ public class ServiceUser : IServiceUsers
 
     public void EditAge(int id, int age)
     {
-        var userDb = _context.Users.Find(id);
+        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
         if (userDb != null)
         {
             userDb.Age = age;
@@ -45,7 +53,8 @@ public class ServiceUser : IServiceUsers
 
     public void Delete(int id)
     {
-        var userDb = _context.Users.Find(id);
+        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
+
         if (userDb != null)
         {
             _context.Users.Remove(userDb);
