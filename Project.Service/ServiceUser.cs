@@ -21,6 +21,20 @@ public class ServiceUser : IServiceUsers
     /// <returns>Идентификатор добавленного пользователя.</returns>
     public int Add(UserModel user)
     {
+        // Проверяем, что имя не пустое
+        if (string.IsNullOrWhiteSpace(user.Name))
+        {
+            Console.WriteLine("Failed to add user: Name is empty or whitespace.");
+            return 0; // Возвращаем 0, если имя пустое
+        }
+
+        // Проверяем, что пользователь с таким именем уже существует
+        if (_context.Users.Any(u => u.Name == user.Name))
+        {
+            Console.WriteLine($"Failed to add user: Name '{user.Name}' already exists.");
+            return 0; // Возвращаем 0, если имя уже существует
+        }
+
         var userDb = new UserDb
         {
             Name = user.Name,
@@ -31,11 +45,10 @@ public class ServiceUser : IServiceUsers
         _context.SaveChanges();
         Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}");
 
-        // Проверка сохранения перед возвратом Id
-        var savedUser = _context.Users.Find(userDb.Id);
-        Console.WriteLine($"Saved user after save: {savedUser?.Name}");
         return userDb.Id;
     }
+
+
 
     /// <summary>
     /// Изменяет имя пользователя.
