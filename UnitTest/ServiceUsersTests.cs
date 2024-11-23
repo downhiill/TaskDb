@@ -41,12 +41,6 @@ namespace _1.Tests
             Assert.True(userId > 0);
 
         }
-
-
-
-
-
-
         [Fact]
         public void Delete_ShouldRemoveUser()
         {

@@ -5,12 +5,20 @@ public class ServiceUser : IServiceUsers
 {
     private readonly ApplicationContext _context;
 
-    // Конструктор принимает ApplicationContext через DI
+    /// <summary>
+    /// Конструктор для инъекции зависимости ApplicationContext.
+    /// </summary>
+    /// <param name="context">Контекст базы данных.</param>
     public ServiceUser(ApplicationContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Добавляет нового пользователя в базу данных.
+    /// </summary>
+    /// <param name="user">Модель пользователя, который будет добавлен.</param>
+    /// <returns>Идентификатор добавленного пользователя.</returns>
     public int Add(UserModel user)
     {
         var userDb = new UserDb
@@ -29,8 +37,11 @@ public class ServiceUser : IServiceUsers
         return userDb.Id;
     }
 
-
-
+    /// <summary>
+    /// Изменяет имя пользователя.
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя, чье имя необходимо изменить.</param>
+    /// <param name="name">Новое имя пользователя.</param>
     public void EditName(int id, string name)
     {
         var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
@@ -41,6 +52,11 @@ public class ServiceUser : IServiceUsers
         }
     }
 
+    /// <summary>
+    /// Изменяет возраст пользователя.
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя, чей возраст необходимо изменить.</param>
+    /// <param name="age">Новый возраст пользователя.</param>
     public void EditAge(int id, int age)
     {
         var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
@@ -51,6 +67,10 @@ public class ServiceUser : IServiceUsers
         }
     }
 
+    /// <summary>
+    /// Удаляет пользователя по идентификатору.
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя, которого нужно удалить.</param>
     public void Delete(int id)
     {
         var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
@@ -62,6 +82,10 @@ public class ServiceUser : IServiceUsers
         }
     }
 
+    /// <summary>
+    /// Получает всех пользователей из базы данных.
+    /// </summary>
+    /// <returns>Список всех пользователей.</returns>
     public List<UserModel> GetAllUsers()
     {
         return _context.Users
@@ -69,6 +93,11 @@ public class ServiceUser : IServiceUsers
             .ToList();
     }
 
+    /// <summary>
+    /// Ищет пользователей старше указанного возраста.
+    /// </summary>
+    /// <param name="age">Возраст, с которого начинается поиск.</param>
+    /// <returns>Список пользователей старше указанного возраста.</returns>
     public List<UserModel> SearchUsersMoreAge(int age)
     {
         return _context.Users
@@ -77,6 +106,11 @@ public class ServiceUser : IServiceUsers
             .ToList();
     }
 
+    /// <summary>
+    /// Ищет пользователей по имени, совпадающему с заданным поисковым запросом.
+    /// </summary>
+    /// <param name="searchTerm">Поисковый запрос для имени пользователя.</param>
+    /// <returns>Список пользователей, чьи имена содержат поисковый запрос.</returns>
     public List<UserModel> SearchUsers(string searchTerm)
     {
         return _context.Users

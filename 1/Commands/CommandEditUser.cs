@@ -1,22 +1,33 @@
 ﻿using Project.IService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace _1.Commands
 {
+    /// <summary>
+    /// Команда для изменения данных пользователя.
+    /// </summary>
     public class CommandEditUser : ICommand
     {
         private readonly IServiceUsers _service;
 
+        /// <summary>
+        /// Конструктор, инициализирующий сервис пользователей.
+        /// </summary>
+        /// <param name="service">Интерфейс сервиса для работы с пользователями.</param>
         public CommandEditUser(IServiceUsers service)
         {
             _service = service;
         }
-        public string Name => "Изменить данные";
+
+        /// <summary>
+        /// Название команды, отображаемое в меню.
+        /// </summary>
+        public string Name => "Изменить имя";
+
+        /// <summary>
+        /// Выполняет изменение имени пользователя.
+        /// Запрашивает ID пользователя и новое имя, после чего обновляет данные.
+        /// </summary>
         public void Execute()
         {
             Console.Write("Введите ID пользователя: ");

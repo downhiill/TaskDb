@@ -10,10 +10,16 @@ using Project.IService;
 
 namespace _1
 {
+    /// <summary>
+    /// Основной класс приложения, который управляет зависимостями и выполнением команд.
+    /// </summary>
     public class App
     {
         private readonly ServiceUser _service;
 
+        /// <summary>
+        /// Конструктор для инициализации конфигурации, DI контейнера и регистрации зависимостей.
+        /// </summary>
         public App()
         {
             // Создаем конфигурацию из appsettings.json
@@ -35,7 +41,9 @@ namespace _1
             _service = (ServiceUser?)serviceProvider.GetRequiredService<IServiceUsers>();  // Используем интерфейс, а не конкретный класс
         }
 
-
+        /// <summary>
+        /// Запускает приложение и обрабатывает выбор команд пользователя.
+        /// </summary>
         public void Run()
         {
             // Получаем все команды, которые реализуют интерфейс ICommand

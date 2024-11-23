@@ -1,28 +1,39 @@
 ﻿using Project.IService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace _1.Commands
 {
+    /// <summary>
+    /// Команда для отображения всех пользователей.
+    /// </summary>
     public class CommandShowAllUsers : ICommand
     {
         private readonly IServiceUsers _service;
 
+        /// <summary>
+        /// Конструктор команды для вывода всех пользователей.
+        /// </summary>
+        /// <param name="service">Интерфейс сервиса для работы с пользователями.</param>
         public CommandShowAllUsers(IServiceUsers service)
         {
             _service = service;
         }
-        public string Name => "Вывод всех пользователей ";
+
+        /// <summary>
+        /// Название команды, отображаемое в меню.
+        /// </summary>
+        public string Name => "Вывод всех пользователей";
+
+        /// <summary>
+        /// Выполняет вывод всех пользователей из базы данных.
+        /// </summary>
         public void Execute()
         {
             var users = _service.GetAllUsers();
 
             if (users.Count > 0)
             {
+                Console.WriteLine("Список пользователей:");
                 foreach (var user in users)
                 {
                     Console.WriteLine($"ID: {user.Id}, Имя: {user.Name}, Возраст: {user.Age}");
@@ -30,7 +41,7 @@ namespace _1.Commands
             }
             else
             {
-                Console.WriteLine("Пользователи не найдены.");
+                Console.WriteLine("Список пользователей пуст.");
             }
         }
     }

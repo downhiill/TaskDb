@@ -1,18 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Commands
 {
-    internal interface ICommand
+    /// <summary>
+    /// Интерфейс для описания команды.
+    /// </summary>
+    public interface ICommand
     {
         /// <summary>
-        /// Получает имя команды.
+        /// Получает название команды, отображаемое в меню.
         /// </summary>
-        /// <value>Имя команды, которое используется для её идентификации.</value>
         string Name { get; }
+
+        /// <summary>
+        /// Выполняет действие, связанное с данной командой.
+        /// </summary>
         void Execute();
     }
 }

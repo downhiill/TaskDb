@@ -1,21 +1,33 @@
 ﻿using Project.IService;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _1.Commands
 {
+    /// <summary>
+    /// Команда для изменения возраста пользователя.
+    /// </summary>
     internal class CommandEditAge
     {
         private readonly IServiceUsers _service;
 
+        /// <summary>
+        /// Конструктор, инициализирующий сервис пользователей.
+        /// </summary>
+        /// <param name="service">Интерфейс сервиса для работы с пользователями.</param>
         public CommandEditAge(IServiceUsers service)
         {
             _service = service;
         }
+
+        /// <summary>
+        /// Название команды, отображаемое в меню.
+        /// </summary>
         public string Name => "Изменить возраст";
+
+        /// <summary>
+        /// Выполняет изменение возраста пользователя.
+        /// Запрашивает ID пользователя и новый возраст, после чего обновляет данные.
+        /// </summary>
         public void Execute()
         {
             Console.Write("Введите ID пользователя: ");
@@ -24,7 +36,7 @@ namespace _1.Commands
             int age = int.Parse(Console.ReadLine());
 
             _service.EditAge(userId, age);
-            Console.WriteLine("Имя пользователя изменено.");
+            Console.WriteLine("Возраст пользователя изменён.");
         }
     }
 }
