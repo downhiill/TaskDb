@@ -42,22 +42,26 @@ namespace _1.Tests
             Assert.True(userId > 0);
         }
 
-        [Theory(DisplayName = "Добавление пользователя с некорректным именем")]
-        [Trait("Category", "Critical")]
-        [InlineData("")]         // Пустое имя
-        [InlineData(" ")]        // Пробел
-        [InlineData("\t")]       // Табуляция
-        public void Add_ShouldNotAddUserWithInvalidName(string invalidName)
+        public static IEnumerable<object[]> InvalidUsers => new List<object[]>
         {
-            var user = new UserModel { Name = invalidName, Age = 30 };
+            new object[] { new UserModel { Name = "", Age = 30 } },
+            new object[] { new UserModel { Name = " ", Age = 25 } },
+            new object[] { new UserModel { Name = "\t", Age = 40 } }
+        };
 
+        [Theory(DisplayName = "Добавление пользователя с некорректной моделью")]
+        [Trait("Category", "Critical")]
+        [MemberData(nameof(InvalidUsers))]
+        public void Add_ShouldNotAddUserWithInvalidModel(UserModel invalidUser)
+        {
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            int userId = service.Add(user);
+            int userId = service.Add(invalidUser);
 
             Assert.Equal(0, userId);
         }
+
 
 
         [Fact(DisplayName = "Добавление пользователя с уже существующим именем")]
