@@ -29,6 +29,10 @@ namespace Project.IService
         /// <param name="age">Новый возраст пользователя.</param>
         void EditAge(int userId, int age);
 
+        void EditDateOfBirth(int userId, DateTime dateOfBirth);
+
+        void EditWages(int userId, decimal wages);
+
         /// <summary>
         /// Удаляет пользователя.
         /// </summary>
@@ -40,6 +44,8 @@ namespace Project.IService
         /// </summary>
         /// <returns>Список всех пользователей.</returns>
         List<UserModel> GetAllUsers();
+
+        List<ShortUser> GetAllShortUsers(int skip, int take);
 
         /// <summary>
         /// Ищет пользователей старше указанного возраста.

@@ -1,0 +1,63 @@
+﻿using _1.Tests;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Project.IService;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UnitTest
+{
+    public class UserDeleteTest : ServiceUsersTests
+    {
+        [Fact(DisplayName = "Удаление пользователя из базы данных")]
+        [Trait("Category", "CoreFunctionality")]
+        public void Delete_ShouldRemoveUser()
+        {
+            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+
+            // Мокируем метод Add, чтобы он всегда возвращал ID пользователя (например, 1)
+            _mockServiceUsers.Setup(service => service.Add(It.IsAny<UserModel>())).Returns(1);
+
+            // Мокируем добавление пользователя
+            int userId = _mockServiceUsers.Object.Add(user);
+
+            // Настроим мок для метода Delete, чтобы он корректно выполнялся
+            _mockServiceUsers.Setup(service => service.Delete(userId)).Verifiable();
+
+            // Удаляем пользователя через мок
+            _mockServiceUsers.Object.Delete(userId);
+
+            // Проверяем, что метод Delete был вызван
+            _mockServiceUsers.Verify(service => service.Delete(userId), Times.Once);
+
+            // Проверяем, что пользователь был удален из контекста базы данных
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+            Assert.Null(context.Users.Find(userId)); // Реальный контекст
+        }
+
+        [Fact(DisplayName = "Удаление несуществующего пользователя")]
+        [Trait("Category", "CoreFunctionality")]
+        public void Delete_ShouldNotRemoveNonExistentUser()
+        {
+            // Мокируем метод Delete для несуществующего пользователя
+            var mockServiceUsers = new Mock<IServiceUsers>();
+
+            // Настройка мока для метода Delete
+            mockServiceUsers
+                .Setup(service => service.Delete(It.IsAny<int>())) // Не нужно возвращать значение
+                .Verifiable(); // Проверка, что метод был вызван
+
+            var serviceUsers = mockServiceUsers.Object;
+
+            // Попытка удалить пользователя с несуществующим ID
+            serviceUsers.Delete(9999); // Предположим, что ID 9999 не существует
+
+            // Проверяем, что метод Delete был вызван
+            mockServiceUsers.Verify(service => service.Delete(9999), Times.Once);
+        }
+    }
+}

@@ -38,12 +38,16 @@ public class ServiceUser : IServiceUsers
         var userDb = new UserDb
         {
             Name = user.Name,
-            Age = user.Age
+            Age = user.Age,
+            Wages = user.Wages,
+            DateOfBirth = user.DateOfBirth,
+            DateCreate = DateTime.UtcNow,
+            Active = true
         };
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
-        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}");
+        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
 
         return userDb.Id;
     }
@@ -79,7 +83,43 @@ public class ServiceUser : IServiceUsers
             _context.SaveChanges();
         }
     }
+    /// <summary>
+    /// Редактирует заработную плату пользователя по его идентификатору.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя, чью зарплату нужно изменить.</param>
+    /// <param name="wages">Новая заработная плата пользователя.</param>
+    public void EditWages(int userId, decimal wages)
+    {
+        var user = _context.Users.Find(userId);
+        if (user != null)
+        {
+            user.Wages = wages;
+            _context.SaveChanges();
+        }
+        else
+        {
+            Console.WriteLine("Пользователь не найден.");
+        }
+    }
 
+    /// <summary>
+    /// Редактирует дату рождения пользователя по его идентификатору.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя, чью дату рождения нужно изменить.</param>
+    /// <param name="dateOfBirth">Новая дата рождения пользователя.</param>
+    public void EditDateOfBirth(int userId, DateTime dateOfBirth)
+    {
+        var user = _context.Users.Find(userId);
+        if (user != null)
+        {
+            user.DateOfBirth = dateOfBirth;
+            _context.SaveChanges();
+        }
+        else
+        {
+            Console.WriteLine("Пользователь не найден.");
+        }
+    }
     /// <summary>
     /// Удаляет пользователя по идентификатору.
     /// </summary>
@@ -103,6 +143,29 @@ public class ServiceUser : IServiceUsers
     {
         return _context.Users
             .Select(u => new UserModel { Id = u.Id, Name = u.Name, Age = u.Age })
+            .ToList();
+    }
+
+    /// <summary>
+    /// Получает список пользователей с пагинацией и преобразует их в краткую информацию (ShortUser).
+    /// </summary>
+    /// <param name="skip">Количество пользователей, которых нужно пропустить.</param>
+    /// <param name="take">Количество пользователей, которых нужно взять.</param>
+    /// <returns>Список краткой информации о пользователях (ShortUser).</returns>
+    public List<ShortUser> GetAllShortUsers(int skip, int take)
+    {
+        if (skip < 0 || take <= 0)
+            throw new ArgumentException("Skip must be non-negative, and take must be greater than zero.");
+
+        return _context.Users
+            .Skip(skip)
+            .Take(take)
+            .Select(u => new ShortUser  // Преобразуем User в ShortUser
+            {
+                Id = u.Id,
+                Name = u.Name,
+                DateOfBirth = u.DateOfBirth
+            })
             .ToList();
     }
 

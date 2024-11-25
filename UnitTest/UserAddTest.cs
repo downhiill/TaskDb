@@ -1,0 +1,68 @@
+﻿using _1.Tests;
+using Microsoft.Extensions.DependencyInjection;
+using Project.IService;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UnitTest
+{
+    public class UserAddTest : ServiceUsersTests
+    {
+        [Fact(DisplayName = "Добавление пользователя в базу данных")]
+        [Trait("Category", "Critical")]
+        public void Add_ShouldAddUser()
+        {
+            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+
+            // Используем один скоуп для добавления и чтения
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+
+            // Добавляем пользователя
+            int userId = _serviceProvider.GetRequiredService<IServiceUsers>().Add(user);
+
+            // Проверяем, что ID пользователя больше нуля (пользователь добавлен)
+            Assert.True(userId > 0);
+        }
+
+
+
+        [Theory(DisplayName = "Добавление пользователя с некорректной моделью")]
+        [Trait("Category", "Critical")]
+        [MemberData(nameof(TestData.InvalidUsers), MemberType = typeof(TestData))]
+        public void Add_ShouldNotAddUserWithInvalidModel(UserModel invalidUser)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
+
+            int userId = service.Add(invalidUser);
+
+            Assert.Equal(0, userId);
+        }
+
+
+
+        [Fact(DisplayName = "Добавление пользователя с уже существующим именем")]
+        [Trait("Category", "Critical")]
+        public void Add_ShouldNotAddUserWithDuplicateName()
+        {
+            var user1 = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            var user2 = new UserModel { Name = "John", Age = 25, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+
+            using var scope = _serviceProvider.CreateScope();
+            var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
+
+            // Добавляем первого пользователя
+            int userId1 = realServiceUsers.Add(user1);
+            Assert.NotEqual(0, userId1); // Проверяем, что первый пользователь добавлен
+
+            // Попытка добавить пользователя с таким же именем
+            int userId2 = realServiceUsers.Add(user2);
+            Assert.Equal(0, userId2); // Проверяем, что второй пользователь не был добавлен
+        }
+
+    }
+}

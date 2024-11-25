@@ -41,8 +41,12 @@ namespace _1.Commands
             string name = Console.ReadLine();
             Console.Write("Введите возраст пользователя: ");
             int age = int.Parse(Console.ReadLine());
+            Console.Write("Введите дату рождения пользователя (yyyy/mm/dd): ");
+            DateTime dateOfbirth = DateTime.Parse(Console.ReadLine());
+            Console.WriteLine("Введите З/п:");
+            decimal wages = decimal.Parse(Console.ReadLine());
 
-            var user = new UserModel { Name = name, Age = age };
+            var user = new UserModel { Name = name, Age = age, Wages = wages, DateOfBirth = dateOfbirth };
             _service.Add(user);
 
             Console.WriteLine("Пользователь добавлен.");
