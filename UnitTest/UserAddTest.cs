@@ -15,7 +15,16 @@ namespace UnitTest
         [Trait("Category", "Critical")]
         public void Add_ShouldAddUser()
         {
-            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            var user = new UserModel 
+            { 
+                
+                Name = "John", 
+                SecondName = "Smith", 
+                Age = 30, 
+                Wages = 12500, 
+                DateOfBirth = new DateTime(2000, 12, 25)
+            };
+            user.FullName = $"{user.Name} {user.SecondName}";
 
             // Используем один скоуп для добавления и чтения
             using var scope = _serviceProvider.CreateScope();
@@ -49,8 +58,11 @@ namespace UnitTest
         [Trait("Category", "Critical")]
         public void Add_ShouldNotAddUserWithDuplicateName()
         {
-            var user1 = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
-            var user2 = new UserModel { Name = "John", Age = 25, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            var user1 = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            user1.FullName = $"{user1.Name} {user1.SecondName}";
+            var user2 = new UserModel { Name = "John", SecondName = "Smith", Age = 25, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            user2.FullName = $"{user2.Name} {user2.SecondName}";
+
 
             using var scope = _serviceProvider.CreateScope();
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();

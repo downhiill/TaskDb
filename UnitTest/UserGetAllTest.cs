@@ -19,8 +19,8 @@ namespace UnitTest
             // Подготавливаем список пользователей
             var users = new List<UserModel>
             {
-                new UserModel {Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)},
-                new UserModel {Name = "Jane", Age = 25, Wages = 12400, DateOfBirth = new DateTime(2000, 11, 25)}
+                new UserModel {Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)},
+                new UserModel {Name = "Jane", SecondName = "Smpoke", Age = 25, Wages = 12400, DateOfBirth = new DateTime(2000, 11, 25)}
             };
 
             // Настраиваем мок для метода GetAllUsers
@@ -33,8 +33,8 @@ namespace UnitTest
             Assert.Equal(2, result.Count);
 
             // Проверяем, что все пользователи возвращаются правильно
-            Assert.Contains(result, user => user.Name == "John" && user.Age == 30 && user.Wages == 12500 && user.DateOfBirth == new DateTime(2000, 12, 25));
-            Assert.Contains(result, user => user.Name == "Jane" && user.Age == 25 && user.Wages == 12400 && user.DateOfBirth == new DateTime(2000, 11, 25));
+            Assert.Contains(result, user => user.Name == "John" && user.SecondName == "Smith" && user.Age == 30 && user.Wages == 12500 && user.DateOfBirth == new DateTime(2000, 12, 25));
+            Assert.Contains(result, user => user.Name == "Jane" && user.SecondName == "Smpoke" && user.Age == 25 && user.Wages == 12400 && user.DateOfBirth == new DateTime(2000, 11, 25));
         }
 
         [Fact(DisplayName = "Получение всех пользователей с краткой информацией")]

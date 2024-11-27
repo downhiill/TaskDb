@@ -38,16 +38,20 @@ public class ServiceUser : IServiceUsers
         var userDb = new UserDb
         {
             Name = user.Name,
+            SecondName = user.SecondName,
+            FullName = user.FullName,
             Age = user.Age,
             Wages = user.Wages,
             DateOfBirth = user.DateOfBirth,
             DateCreate = DateTime.UtcNow,
-            Active = true
+            Active = true,
+            RoleId = user.RoleId
+            
         };
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
-        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
+        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name},{user.SecondName},{user.FullName}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
 
         return userDb.Id;
     }

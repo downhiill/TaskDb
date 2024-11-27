@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Project.Data;
+using Project.Data.Configuration;
 
 /// <summary>
 /// Контекст базы данных для работы с сущностями приложения.
@@ -31,5 +32,21 @@ public class ApplicationContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder); // DI будет управлять конфигурацией
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new UserConfiguration()); // Применение конфигурации для User
+        modelBuilder.ApplyConfiguration(new RoleConfiguration()); // Применение конфигурации для Role
+                                                                  
+        // Устанавливаем значение по умолчанию для поля DateCreate
+        modelBuilder.Entity<UserDb>()
+            .Property(u => u.DateCreate)
+            .HasDefaultValueSql("GETDATE()");
+
+        // Настраиваем вычисляемое поле FullName
+        modelBuilder.Entity<UserDb>()
+            .Property(u => u.FullName)
+            .HasComputedColumnSql("[Name] + ' ' + [SecondName]");
     }
 }

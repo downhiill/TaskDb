@@ -29,7 +29,7 @@ namespace UnitTest
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
                 {
-                    var userDb = new UserDb { Name = user.Name, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth };
+                    var userDb = new UserDb { Name = user.Name, SecondName = user.SecondName, FullName = user.FullName, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth };
                     context.Users.Add(userDb);
                     context.SaveChanges();
                     return userDb.Id;
@@ -38,9 +38,16 @@ namespace UnitTest
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователей через мок
-            serviceUsers.Add(new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) });
-            serviceUsers.Add(new UserModel { Name = "Jane", Age = 40, Wages = 12400, DateOfBirth = new DateTime(2000, 10, 25) });
-            serviceUsers.Add(new UserModel { Name = "Alice", Age = 20, Wages = 12300, DateOfBirth = new DateTime(2000, 11, 25) });
+            var user1 = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)};
+            user1.FullName = $"{user1.Name} {user1.SecondName}";
+            serviceUsers.Add(user1);
+            var user2 = new UserModel { Name = "Jane", SecondName = "Smpoke", Age = 40, Wages = 12400, DateOfBirth = new DateTime(2000, 10, 25) };
+            user2.FullName = $"{user2.Name} {user2.SecondName}";
+            serviceUsers.Add(user2);
+            var user3 = new UserModel { Name = "Alice", SecondName = "Wayn", Age = 20, Wages = 12300, DateOfBirth = new DateTime(2000, 11, 25) };
+            user3.FullName = $"{user3.Name} {user3.SecondName}";
+            serviceUsers.Add(user3);
+
 
             // Получаем реальный сервис для вызова метода поиска
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
@@ -65,9 +72,10 @@ namespace UnitTest
             // Подготавливаем список пользователей
             var users = new List<UserModel>
             {
-                new UserModel {Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)},
-                new UserModel {Name = "Jane", Age = 25, Wages = 12400, DateOfBirth = new DateTime(2000, 11, 25)}
+                new UserModel {Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)},
+                new UserModel {Name = "Jane", SecondName = "Wayn", Age = 25, Wages = 12400, DateOfBirth = new DateTime(2000, 11, 25)}
             };
+
 
             // Настройка мока для метода SearchUsers
             mockServiceUsers
@@ -94,8 +102,8 @@ namespace UnitTest
             // Подготавливаем список пользователей
             var users = new List<UserModel>
             {
-                new UserModel {Name = "John", Age = 30, Wages = 12400, DateOfBirth = new DateTime(2000, 10, 25)},
-                new UserModel {Name = "Jane", Age = 25, Wages = 12200, DateOfBirth = new DateTime(2000, 11, 25)}
+                new UserModel {Name = "John", SecondName = "Smith", Age = 30, Wages = 12400, DateOfBirth = new DateTime(2000, 10, 25)},
+                new UserModel {Name = "Jane", SecondName = "Wayn", Age = 25, Wages = 12200, DateOfBirth = new DateTime(2000, 11, 25)}
             };
 
             // Настроим мок для метода SearchUsers

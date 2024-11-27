@@ -16,7 +16,7 @@ namespace UnitTest
         [Trait("Category", "CoreFunctionality")]
         public void Delete_ShouldRemoveUser()
         {
-            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            var user = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
 
             // Мокируем метод Add, чтобы он всегда возвращал ID пользователя (например, 1)
             _mockServiceUsers.Setup(service => service.Add(It.IsAny<UserModel>())).Returns(1);

@@ -29,14 +29,15 @@ namespace UnitTest
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
                 {
-                    var userDb = new UserDb { Name = user.Name, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
+                    var userDb = new UserDb { Name = user.Name, SecondName = user.SecondName, FullName = user.FullName, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
                     context.Users.Add(userDb);
                     context.SaveChanges();
                     return userDb.Id; // Возвращаем ID добавленного пользователя
                 });
 
             // Создаем тестового пользователя
-            var user = new UserModel { Name = originalName, Age = 30, Wages = 12500, DateOfBirth = new DateTime(2001, 12, 13) };
+            var user = new UserModel { Name = originalName, SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2001, 12, 13) };
+            user.FullName = $"{user.Name} {user.SecondName}";
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователя через мок
@@ -82,7 +83,7 @@ namespace UnitTest
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
                 {
-                    var userDb = new UserDb { Name = user.Name, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
+                    var userDb = new UserDb { Name = user.Name, SecondName = user.SecondName, FullName = user.FullName, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
                     context.Users.Add(userDb);
                     context.SaveChanges();
                     return userDb.Id;
@@ -91,7 +92,8 @@ namespace UnitTest
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователя через мок
-            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            var user = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            user.FullName = $"{user.Name} {user.SecondName}";
             int userId = serviceUsers.Add(user);
 
             // Изменяем возраст пользователя через реальный сервис
@@ -134,7 +136,7 @@ namespace UnitTest
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
                 {
-                    var userDb = new UserDb { Name = user.Name, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
+                    var userDb = new UserDb { Name = user.Name, SecondName = user.SecondName, FullName = user.FullName, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
                     context.Users.Add(userDb);
                     context.SaveChanges();
                     return userDb.Id;
@@ -143,7 +145,8 @@ namespace UnitTest
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователя через мок
-            var user = new UserModel { Name = "John", Age = 30, Wages = 125000, DateOfBirth = new DateTime(2000, 12, 15) };
+            var user = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 125000, DateOfBirth = new DateTime(2000, 12, 15) };
+            user.FullName = $"{user.Name} {user.SecondName}";
             int userId = serviceUsers.Add(user);
 
             // Изменяем зарплату пользователя через реальный сервис
@@ -169,7 +172,7 @@ namespace UnitTest
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
                 {
-                    var userDb = new UserDb { Name = user.Name, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
+                    var userDb = new UserDb { Name = user.Name, SecondName = user.SecondName, FullName = user.FullName, Age = user.Age, Wages = user.Wages, DateOfBirth = user.DateOfBirth, Active = user.Active, DateCreate = user.DateCreate };
                     context.Users.Add(userDb);
                     context.SaveChanges();
                     return userDb.Id;
@@ -178,7 +181,8 @@ namespace UnitTest
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователя через мок
-            var user = new UserModel { Name = "John", Age = 30, Wages = 125000, DateOfBirth = new DateTime(2000, 12, 15) };
+            var user = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 125000, DateOfBirth = new DateTime(2000, 12, 15) };
+            user.FullName = $"{user.Name} {user.SecondName}";
             int userId = serviceUsers.Add(user);
 
             // Изменяем зарплату пользователя через реальный сервис

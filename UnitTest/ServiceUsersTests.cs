@@ -9,11 +9,26 @@ using Xunit;
 
 namespace _1.Tests
 {
+    /// <summary>
+    /// Класс, содержащий тесты для сервиса пользователей.
+    /// Использует мокированные объекты и In-Memory базу данных для тестирования.
+    /// </summary>
     public class ServiceUsersTests
     {
+        /// <summary>
+        /// Мокированное представление интерфейса IServiceUsers для тестирования.
+        /// </summary>
         protected readonly Mock<IServiceUsers> _mockServiceUsers;
+
+        /// <summary>
+        /// Сервис-поставщик, создающий и управляемый объектами с помощью внедрения зависимостей.
+        /// </summary>
         protected readonly ServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// Конструктор для инициализации тестовой среды.
+        /// Настроены Mock для сервиса пользователей и In-Memory база данных для тестов.
+        /// </summary>
         public ServiceUsersTests()
         {
             // Инициализация мокированного интерфейса и DI контейнера
