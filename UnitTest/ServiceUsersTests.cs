@@ -15,30 +15,30 @@ namespace _1.Tests
     /// </summary>
     public class ServiceUsersTests
     {
-        /// <summary>
-        /// Мокированное представление интерфейса IServiceUsers для тестирования.
-        /// </summary>
-        protected readonly Mock<IServiceUsers> _mockServiceUsers;
+            /// <summary>
+            /// Мокированное представление интерфейса IServiceUsers для тестирования.
+            /// </summary>
+            protected readonly Mock<IServiceUsers> _mockServiceUsers;
 
         /// <summary>
         /// Сервис-поставщик, создающий и управляемый объектами с помощью внедрения зависимостей.
         /// </summary>
         protected readonly ServiceProvider _serviceProvider;
 
-        /// <summary>
-        /// Конструктор для инициализации тестовой среды.
-        /// Настроены Mock для сервиса пользователей и In-Memory база данных для тестов.
-        /// </summary>
-        public ServiceUsersTests()
-        {
-            // Инициализация мокированного интерфейса и DI контейнера
-            _mockServiceUsers = new Mock<IServiceUsers>();
+            /// <summary>
+            /// Конструктор для инициализации тестовой среды.
+            /// Настроены Mock для сервиса пользователей и In-Memory база данных для тестов.
+            /// </summary>
+            public ServiceUsersTests()
+            {
+                // Инициализация мокированного интерфейса и DI контейнера
+                _mockServiceUsers = new Mock<IServiceUsers>();
 
-            _serviceProvider = new ServiceCollection()
-                .AddDbContext<ApplicationContext>(options =>
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальная база данных для каждого теста
-                .AddScoped<IServiceUsers, ServiceUser>() // Используем реальный сервис в DI
-                .BuildServiceProvider();
-        }
+                _serviceProvider = new ServiceCollection()
+                    .AddDbContext<ApplicationContext>(options =>
+                        options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальная база данных для каждого теста
+                    .AddScoped<IServiceUsers, ServiceUser>() // Используем реальный сервис в DI
+                    .BuildServiceProvider();
+            }
     }
 }

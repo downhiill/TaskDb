@@ -1,5 +1,7 @@
 ﻿using _1.Tests;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Project.Data;
 using Project.IService;
 using System;
 using System.Collections.Generic;
@@ -75,6 +77,60 @@ namespace UnitTest
             int userId2 = realServiceUsers.Add(user2);
             Assert.Equal(0, userId2); // Проверяем, что второй пользователь не был добавлен
         }
+
+        [Fact(DisplayName = "Добавление профессии в базу данных")]
+        [Trait("Category", "Critical")]
+        public void AddProfession_ShouldAddProfession()
+        {
+            string professionName = "Software Developer";
+
+            // Используем один скоуп для операций
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+            var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>(); // Ваш класс, который содержит AddProfession
+
+            // Используем метод AddProfession для добавления профессии
+            service.AddProfession(professionName);
+
+            // Проверяем, что профессия добавлена
+            var addedProfession = context.Professions.FirstOrDefault(p => p.Name == professionName);
+            Assert.NotNull(addedProfession);
+            Assert.Equal(professionName, addedProfession.Name);
+        }
+
+        [Fact(DisplayName = "Добавление профессии с пустым именем")]
+        [Trait("Category", "Critical")]
+        public void AddProfession_ShouldNotAddProfessionWithEmptyName()
+        {
+            string professionName = ""; // Пустое имя
+
+            using var scope = _serviceProvider.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>(); // Ваш класс, который содержит AddProfession
+
+            // Ожидаем, что метод выбросит исключение при пустом имени
+            var exception = Assert.Throws<ArgumentException>(() => service.AddProfession(professionName));
+            Assert.Equal("Имя профессии не может быть пустым. (Parameter 'name')", exception.Message);
+        }
+
+
+
+        [Fact(DisplayName = "Добавление дублирующей профессии")]
+        [Trait("Category", "Critical")]
+        public void AddProfession_ShouldNotAddDuplicateProfession()
+        {
+            string professionName = "Software Developer";
+
+            using var scope = _serviceProvider.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>(); // Ваш класс, который содержит AddProfession
+
+            // Добавляем первую профессию
+            service.AddProfession(professionName);
+
+            // Проверяем, что дублирование профессии вызовет исключение
+            var exception = Assert.Throws<DbUpdateException>(() => service.AddProfession(professionName));
+            Assert.Equal("Такая профессия уже существует.", exception.Message);
+        }
+
 
     }
 }

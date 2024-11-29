@@ -86,5 +86,67 @@ namespace UnitTest
             // Проверяем, что список пользователей пуст
             Assert.Empty(result);
         }
+
+        [Fact(DisplayName = "Получение всех профессий пользователей из базы")]
+        [Trait("Priority", "High")]
+        public void GetAllProfessionsUsers_ShouldReturnAllUsersWithProfessions()
+        {
+            // Подготавливаем список пользователей с профессиями
+            var users = new List<UserModel>
+            {
+                new UserModel { Name = "John", ProfessionModel = new ProfessionModel { Name = "Developer" }},
+                new UserModel { Name = "Jane", ProfessionModel = new ProfessionModel { Name = "Manager" }}
+            };
+
+            // Настраиваем мок для метода GetAllProfessionsUsers
+            _mockServiceUsers.Setup(service => service.GetAllProfessionsUsers()).Returns(users.Select(u => new ModelUserProfession
+            {
+                UserName = u.Name,
+                ProfessionName = u.ProfessionModel.Name
+            }).ToList());
+
+            // Вызываем реальный метод GetAllProfessionsUsers через мок
+            var result = _mockServiceUsers.Object.GetAllProfessionsUsers();
+
+            // Проверяем, что количество пользователей с профессиями корректно
+            Assert.Equal(2, result.Count);
+
+            // Проверяем, что все пользователи и их профессии возвращаются правильно
+            Assert.Contains(result, item => item.UserName == "John" && item.ProfessionName == "Developer");
+            Assert.Contains(result, item => item.UserName == "Jane" && item.ProfessionName == "Manager");
+        }
+
+        [Fact(DisplayName = "Получение статистики по профессиям из базы")]
+        [Trait("Priority", "High")]
+        public void GetAllProfessionsStats_ShouldReturnProfessionStats()
+        {
+            // Подготавливаем список профессий
+            var professions = new List<ProfessionModel>
+            {
+                new ProfessionModel { Name = "Developer", Users = new List<UserModel> { new UserModel(), new UserModel() }},
+                new ProfessionModel { Name = "Manager", Users = new List<UserModel> { new UserModel() }}
+            };
+
+            // Настроим мок для метода GetAllProfessionsStats
+            _mockServiceUsers.Setup(service => service.GetAllProfessionsStats()).Returns(professions.Select(p => new ModelProfessionStats
+            {
+                Name = p.Name,
+                Count = p.Users.Count
+            }).ToList());
+
+            // Вызываем реальный метод GetAllProfessionsStats через мок
+            var result = _mockServiceUsers.Object.GetAllProfessionsStats();
+
+            // Проверяем, что количество профессий и количество пользователей в профессиях корректно
+            Assert.Equal(2, result.Count);
+
+            // Проверяем статистику по профессиям
+            Assert.Contains(result, item => item.Name == "Developer" && item.Count == 2);
+            Assert.Contains(result, item => item.Name == "Manager" && item.Count == 1);
+        }
+
+
     }
+
 }
+

@@ -13,6 +13,8 @@ public class ApplicationContext : DbContext
     /// Позволяет выполнять операции CRUD для сущности <see cref="UserDb"/>.
     /// </summary>
     public DbSet<UserDb> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Profession> Professions { get; set; }
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="ApplicationContext"/> 
@@ -48,6 +50,7 @@ public class ApplicationContext : DbContext
         // Применение конфигураций для сущностей User и Role
         modelBuilder.ApplyConfiguration(new UserConfiguration()); // Применение конфигурации для User
         modelBuilder.ApplyConfiguration(new RoleConfiguration()); // Применение конфигурации для Role
+        modelBuilder.ApplyConfiguration(new ProfessionConfiguration());
 
         // Устанавливаем значение по умолчанию для поля DateCreate
         modelBuilder.Entity<UserDb>()
@@ -58,5 +61,6 @@ public class ApplicationContext : DbContext
         modelBuilder.Entity<UserDb>()
             .Property(u => u.FullName)
             .HasComputedColumnSql("[Name] + ' ' + [SecondName]");
+
     }
 }

@@ -65,5 +65,15 @@ namespace Project.IService
         /// Получает или устанавливает модель роли пользователя.
         /// </summary>
         public RoleModel RoleModel { get; set; }
+
+        /// <summary>
+        /// Получает или устанавливает идентификатор профессии пользователя.
+        /// </summary>
+        public int? ProfessionId { get; set; }
+
+        /// <summary>
+        /// Получает или устанавливает модель профессии пользователя.
+        /// </summary>
+        public ProfessionModel ProfessionModel { get; set; }
     }
 }

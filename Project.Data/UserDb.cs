@@ -59,5 +59,15 @@
         /// Получает или устанавливает роль пользователя.
         /// </summary>
         public Role Role { get; set; }
+
+        /// <summary>
+        /// Получает или устанавливает идентификатор профессии пользователя. Может быть null, если профессия не указана.
+        /// </summary>
+        public int? ProfessionId { get; set; }
+
+        /// <summary>
+        /// Получает или устанавливает профессию пользователя.
+        /// </summary>
+        public Profession Profession { get; set; }
     }
 }

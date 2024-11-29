@@ -1,4 +1,5 @@
-﻿using Project.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Project.Data;
 using Project.IService;
 
 public class ServiceUser : IServiceUsers
@@ -56,6 +57,32 @@ public class ServiceUser : IServiceUsers
         return userDb.Id;
     }
 
+    /// <summary>
+    /// Добавляет новую профессию в базу данных.
+    /// </summary>
+    /// <param name="name">Название новой профессии.</param>
+    /// <remarks>Создает новую профессию с указанным названием и сохраняет в базе данных.</remarks>
+    public void AddProfession(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Имя профессии не может быть пустым.", nameof(name));
+        }
+
+        // Проверка на дублирующую профессию
+        if (_context.Professions.Any(p => p.Name == name))
+        {
+            throw new DbUpdateException("Такая профессия уже существует.");
+        }
+
+        var profession = new Profession
+        {
+            Name = name
+        };
+
+        _context.Professions.Add(profession);
+        _context.SaveChanges();
+    }
 
 
     /// <summary>
@@ -65,12 +92,9 @@ public class ServiceUser : IServiceUsers
     /// <param name="name">Новое имя пользователя.</param>
     public void EditName(int id, string name)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
-        if (userDb != null)
-        {
-            userDb.Name = name;
-            _context.SaveChanges();
-        }
+        _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Name, name));
     }
 
     /// <summary>
@@ -80,13 +104,11 @@ public class ServiceUser : IServiceUsers
     /// <param name="age">Новый возраст пользователя.</param>
     public void EditAge(int id, int age)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
-        if (userDb != null)
-        {
-            userDb.Age = age;
-            _context.SaveChanges();
-        }
+        _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Age, age));
     }
+
     /// <summary>
     /// Редактирует заработную плату пользователя по его идентификатору.
     /// </summary>
@@ -94,17 +116,16 @@ public class ServiceUser : IServiceUsers
     /// <param name="wages">Новая заработная плата пользователя.</param>
     public void EditWages(int userId, decimal wages)
     {
-        var user = _context.Users.Find(userId);
-        if (user != null)
-        {
-            user.Wages = wages;
-            _context.SaveChanges();
-        }
-        else
+        int affectedRows = _context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Wages, wages));
+
+        if (affectedRows == 0)
         {
             Console.WriteLine("Пользователь не найден.");
         }
     }
+
 
     /// <summary>
     /// Редактирует дату рождения пользователя по его идентификатору.
@@ -113,13 +134,29 @@ public class ServiceUser : IServiceUsers
     /// <param name="dateOfBirth">Новая дата рождения пользователя.</param>
     public void EditDateOfBirth(int userId, DateTime dateOfBirth)
     {
-        var user = _context.Users.Find(userId);
-        if (user != null)
+        int affectedRows = _context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdate(update => update.SetProperty(u => u.DateOfBirth, dateOfBirth));
+
+        if (affectedRows == 0)
         {
-            user.DateOfBirth = dateOfBirth;
-            _context.SaveChanges();
+            Console.WriteLine("Пользователь не найден.");
         }
-        else
+    }
+
+    /// <summary>
+    /// Изменяет профессию пользователя по его идентификатору.
+    /// </summary>
+    /// <param name="userId">Идентификатор пользователя, чью профессию необходимо изменить.</param>
+    /// <param name="professionId">Новый идентификатор профессии пользователя. Может быть null.</param>
+    /// <remarks>Если пользователь с указанным идентификатором не найден, выводится сообщение.</remarks>
+    public void EditProfessionUser(int userId, int? professionId)
+    {
+        int affectedRows = _context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdate(update => update.SetProperty(u => u.ProfessionId, professionId));
+
+        if (affectedRows == 0)
         {
             Console.WriteLine("Пользователь не найден.");
         }
@@ -130,15 +167,32 @@ public class ServiceUser : IServiceUsers
     /// <param name="id">Идентификатор пользователя, которого нужно удалить.</param>
     public void Delete(int id)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
+        int affectedRows = _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteDelete();
 
-        if (userDb != null)
+        if (affectedRows == 0)
         {
-            _context.Users.Remove(userDb);
-            _context.SaveChanges();
+            Console.WriteLine("Пользователь не найден.");
         }
     }
 
+    /// <summary>
+    /// Удаляет профессию по идентификатору.
+    /// </summary>
+    /// <param name="professionId">Идентификатор профессии, которую нужно удалить.</param>
+    /// <remarks>Если профессия с указанным идентификатором не найдена, выводится сообщение.</remarks>
+    public void DeleteProfession(int professionId)
+    {
+        int affectedRows = _context.Professions
+            .Where(p => p.Id == professionId)
+            .ExecuteDelete();
+
+        if (affectedRows == 0)
+        {
+            Console.WriteLine("Профессия не найдена.");
+        }
+    }
     /// <summary>
     /// Получает всех пользователей из базы данных.
     /// </summary>
@@ -169,6 +223,37 @@ public class ServiceUser : IServiceUsers
                 Id = u.Id,
                 Name = u.Name,
                 DateOfBirth = u.DateOfBirth
+            })
+            .ToList();
+    }
+
+    /// <summary>
+    /// Получает список пользователей и их профессий.
+    /// </summary>
+    /// <returns>Список объектов ModelUserProfession, содержащих имена пользователей и их профессии.</returns>
+    public List<ModelUserProfession> GetAllProfessionsUsers()
+    {
+        return _context.Users
+            .Include(u => u.Profession)
+            .Select(u => new ModelUserProfession
+            {
+                UserName = u.Name,
+                ProfessionName = u.Profession.Name
+            })
+            .ToList();
+    }
+
+    /// <summary>
+    /// Получает статистику по профессиям, включая количество пользователей для каждой профессии.
+    /// </summary>
+    /// <returns>Список объектов ModelProfessionStats, содержащих имя профессии и количество пользователей для каждой профессии.</returns>
+    public List<ModelProfessionStats> GetAllProfessionsStats()
+    {
+        return _context.Professions
+            .Select(p => new ModelProfessionStats
+            {
+                Name = p.Name,
+                Count = p.Users.Count
             })
             .ToList();
     }

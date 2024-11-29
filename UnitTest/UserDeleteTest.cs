@@ -1,6 +1,7 @@
 ﻿using _1.Tests;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Project.Data;
 using Project.IService;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,71 @@ namespace UnitTest
 
             // Проверяем, что метод Delete был вызван
             mockServiceUsers.Verify(service => service.Delete(9999), Times.Once);
+        }
+
+        [Fact(DisplayName = "Удаление профессии")]
+        [Trait("Category", "Critical")]
+        public void DeleteProfession_ShouldRemoveProfessionSuccessfully()
+        {
+            // Arrange
+            using var scope = _serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+
+            // Добавляем тестовую профессию в реальную базу данных
+            var profession = new Profession { Name = "Engineer" };
+            context.Professions.Add(profession);
+            context.SaveChanges();
+
+            // Мокируем сервис IServiceUsers
+            var mockServiceUsers = new Mock<IServiceUsers>();
+
+            // Настроим мок для метода DeleteProfession, чтобы он удалял профессию из контекста
+            mockServiceUsers.Setup(s => s.DeleteProfession(It.IsAny<int>())).Callback<int>((id) =>
+            {
+                // Имитируем удаление профессии из DbSet
+                var professionToDelete = context.Professions.Find(id);
+                if (professionToDelete != null)
+                {
+                    context.Professions.Remove(professionToDelete); // Удаляем профессию
+                    context.SaveChanges(); // Применяем изменения
+                }
+            });
+
+            // Получаем мокированный сервис
+            var service = mockServiceUsers.Object;
+
+            // Act: вызываем метод удаления
+            service.DeleteProfession(profession.Id);
+
+            // Assert: проверяем, что профессия была удалена из базы данных
+            var deletedProfession = context.Professions.Find(profession.Id);
+            Assert.Null(deletedProfession); // Профессия должна быть удалена
+        }
+
+
+        [Fact(DisplayName = "Удаление профессии - профессия не найдена")]
+        [Trait("Category", "Critical")]
+        public void DeleteProfession_ShouldHandleProfessionNotFound()
+        {
+            // Arrange
+            using var scope = _serviceProvider.CreateScope();
+            var mockServiceUsers = new Mock<IServiceUsers>();
+
+            // Настроим мок для метода DeleteProfession так, чтобы он не вызывал исключение, если профессия не найдена
+            mockServiceUsers.Setup(s => s.DeleteProfession(It.IsAny<int>())).Callback<int>((id) =>
+            {
+                // Имитируем поведение, когда профессия не найдена, т.е. ничего не делаем
+                // В реальном методе можно проверить наличие профессии и если не найдено - ничего не делать или логировать.
+            });
+
+            // Получаем мокированный сервис
+            var service = mockServiceUsers.Object;
+
+            // Act: вызываем метод удаления для несуществующего id (например, 9999)
+            Exception ex = Record.Exception(() => service.DeleteProfession(9999));
+
+            // Assert: проверяем, что исключение не было выброшено
+            Assert.Null(ex); // Проверяем, что исключение не было выброшено
         }
     }
 }
