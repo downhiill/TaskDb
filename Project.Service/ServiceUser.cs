@@ -1,4 +1,5 @@
-﻿using Project.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Project.Data;
 using Project.IService;
 
 public class ServiceUser : IServiceUsers
@@ -65,12 +66,9 @@ public class ServiceUser : IServiceUsers
     /// <param name="name">Новое имя пользователя.</param>
     public void EditName(int id, string name)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
-        if (userDb != null)
-        {
-            userDb.Name = name;
-            _context.SaveChanges();
-        }
+        _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Name, name));
     }
 
     /// <summary>
@@ -80,13 +78,11 @@ public class ServiceUser : IServiceUsers
     /// <param name="age">Новый возраст пользователя.</param>
     public void EditAge(int id, int age)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
-        if (userDb != null)
-        {
-            userDb.Age = age;
-            _context.SaveChanges();
-        }
+        _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Age, age));
     }
+
     /// <summary>
     /// Редактирует заработную плату пользователя по его идентификатору.
     /// </summary>
@@ -94,17 +90,16 @@ public class ServiceUser : IServiceUsers
     /// <param name="wages">Новая заработная плата пользователя.</param>
     public void EditWages(int userId, decimal wages)
     {
-        var user = _context.Users.Find(userId);
-        if (user != null)
-        {
-            user.Wages = wages;
-            _context.SaveChanges();
-        }
-        else
+        int affectedRows = _context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdate(update => update.SetProperty(u => u.Wages, wages));
+
+        if (affectedRows == 0)
         {
             Console.WriteLine("Пользователь не найден.");
         }
     }
+
 
     /// <summary>
     /// Редактирует дату рождения пользователя по его идентификатору.
@@ -113,29 +108,29 @@ public class ServiceUser : IServiceUsers
     /// <param name="dateOfBirth">Новая дата рождения пользователя.</param>
     public void EditDateOfBirth(int userId, DateTime dateOfBirth)
     {
-        var user = _context.Users.Find(userId);
-        if (user != null)
-        {
-            user.DateOfBirth = dateOfBirth;
-            _context.SaveChanges();
-        }
-        else
+        int affectedRows = _context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdate(update => update.SetProperty(u => u.DateOfBirth, dateOfBirth));
+
+        if (affectedRows == 0)
         {
             Console.WriteLine("Пользователь не найден.");
         }
     }
+
     /// <summary>
     /// Удаляет пользователя по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор пользователя, которого нужно удалить.</param>
     public void Delete(int id)
     {
-        var userDb = _context.Users.FirstOrDefault(u => u.Id == id);
+        int affectedRows = _context.Users
+            .Where(u => u.Id == id)
+            .ExecuteDelete();
 
-        if (userDb != null)
+        if (affectedRows == 0)
         {
-            _context.Users.Remove(userDb);
-            _context.SaveChanges();
+            Console.WriteLine("Пользователь не найден.");
         }
     }
 
