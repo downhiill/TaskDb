@@ -75,5 +75,10 @@ namespace Project.IService
         /// Получает или устанавливает модель профессии пользователя.
         /// </summary>
         public ProfessionModel ProfessionModel { get; set; }
+
+        /// <summary>
+        /// Список ролей, привязанных к пользователю.
+        /// </summary>
+        public List<RolesUsersModel> Roles { get; set; }
     }
 }

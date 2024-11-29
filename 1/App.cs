@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Project.IService;
+using Project.Service;
 
 namespace _1
 {
@@ -15,11 +16,8 @@ namespace _1
     /// </summary>
     public class App
     {
-        private readonly ServiceUser _service;
+        private readonly IServiceProvider _serviceProvider;
 
-        /// <summary>
-        /// Конструктор для инициализации конфигурации, DI контейнера и регистрации зависимостей.
-        /// </summary>
         public App()
         {
             // Создаем конфигурацию из appsettings.json
@@ -31,47 +29,61 @@ namespace _1
 
             // Настроим DI контейнер и передадим конфигурацию
             var serviceProvider = new ServiceCollection()
-                .AddSingleton(configuration)  // Добавляем конфигурацию в DI
+                .AddSingleton(configuration)
                 .AddDbContext<ApplicationContext>((sp, options) =>
                     options.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")))
-                .AddScoped<IServiceUsers, ServiceUser>() // Регистрируем ServiceUser как IServiceUsers
-                .BuildServiceProvider();
+                .AddScoped<IServiceUsers, ServiceUser>()
+                .AddScoped<IServiceRoles, ServiceRoles>()
+                .AddScoped<IServiceProfession, ServiceProfession>();
 
-            // Получаем экземпляр интерфейса IServiceUsers из DI
-            _service = (ServiceUser?)serviceProvider.GetRequiredService<IServiceUsers>();  // Используем интерфейс, а не конкретный класс
+            // Регистрируем все команды, которые реализуют ICommand
+            RegisterCommands(serviceProvider);
+
+            _serviceProvider = serviceProvider.BuildServiceProvider();
         }
 
         /// <summary>
-        /// Запускает приложение и обрабатывает выбор команд пользователя.
+        /// Автоматически регистрирует все классы, реализующие ICommand
         /// </summary>
-        public void Run()
+        private void RegisterCommands(IServiceCollection serviceCollection)
         {
-            // Получаем все команды, которые реализуют интерфейс ICommand
+            // Получаем все типы, которые реализуют ICommand
             var commandTypes = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(t => typeof(ICommand).IsAssignableFrom(t) && !t.IsInterface)
                 .ToList();
 
-            // Выводим меню с доступными командами
+            // Регистрируем каждую команду в DI контейнере
+            foreach (var commandType in commandTypes)
+            {
+                serviceCollection.AddScoped(commandType); // Регистрация каждой команды
+            }
+        }
+
+        public void Run()
+        {
+            var commandTypes = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => typeof(ICommand).IsAssignableFrom(t) && !t.IsInterface)
+                .ToList();
+
             while (true)
             {
                 Console.WriteLine("Выберите действие:");
 
-                // Динамически выводим меню
                 for (int i = 0; i < commandTypes.Count; i++)
                 {
                     var commandType = commandTypes[i];
-                    var command = (ICommand)Activator.CreateInstance(commandType, _service);
+                    var command = (ICommand)_serviceProvider.GetRequiredService(commandType); // Используем DI для создания экземпляра
                     Console.WriteLine($"{i + 1}. {command.Name}");
                 }
 
                 var choice = Console.ReadLine();
 
-                // Преобразуем выбор в индекс и выполняем команду
                 if (int.TryParse(choice, out int index) && index >= 1 && index <= commandTypes.Count)
                 {
                     var commandType = commandTypes[index - 1];
-                    var command = (ICommand)Activator.CreateInstance(commandType, _service);
+                    var command = (ICommand)_serviceProvider.GetRequiredService(commandType); // Используем DI для выполнения команды
                     command.Execute();
                 }
                 else
@@ -81,4 +93,5 @@ namespace _1
             }
         }
     }
+
 }

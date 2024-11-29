@@ -1,5 +1,4 @@
-﻿using _1.Tests;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Project.Data;
 using Project.IService;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnitTest
+namespace UnitTest.ServiceUserTest
 {
     public class UserSearchTest : ServiceUsersTests
     {
@@ -38,7 +37,7 @@ namespace UnitTest
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователей через мок
-            var user1 = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25)};
+            var user1 = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
             user1.FullName = $"{user1.Name} {user1.SecondName}";
             serviceUsers.Add(user1);
             var user2 = new UserModel { Name = "Jane", SecondName = "Smpoke", Age = 40, Wages = 12400, DateOfBirth = new DateTime(2000, 10, 25) };

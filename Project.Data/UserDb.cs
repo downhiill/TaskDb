@@ -69,5 +69,10 @@
         /// Получает или устанавливает профессию пользователя.
         /// </summary>
         public Profession Profession { get; set; }
+
+        /// <summary>
+        /// Список ролей, привязанных к пользователю.
+        /// </summary>
+        public List<RolesUsers> Roles { get; set; }
     }
 }

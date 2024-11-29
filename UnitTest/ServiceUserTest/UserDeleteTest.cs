@@ -1,5 +1,4 @@
-﻿using _1.Tests;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Project.Data;
 using Project.IService;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnitTest
+namespace UnitTest.ServiceUserTest
 {
     public class UserDeleteTest : ServiceUsersTests
     {

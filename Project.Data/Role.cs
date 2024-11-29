@@ -4,29 +4,23 @@ using System.Collections.Generic;
 namespace Project.Data
 {
     /// <summary>
-    /// Представляет роль пользователя в системе.
-    /// Содержит информацию о типе роли и её названии.
+    /// Представляет роль, которая может быть назначена пользователям.
     /// </summary>
     public class Role
     {
         /// <summary>
-        /// Уникальный идентификатор роли.
+        /// Уникальный идентификатор роли, основанный на перечислении <see cref="EnumTypeRoles"/>.
         /// </summary>
-        public int Id { get; set; }
+        public EnumTypeRoleDb Id { get; set; }
 
         /// <summary>
-        /// Тип роли, определённый в <see cref="EnumTypeRoleDb"/>.
-        /// </summary>
-        public EnumTypeRoleDb Type { get; set; }
-
-        /// <summary>
-        /// Название роли.
+        /// Название роли (например, "Админ", "Пользователь", "Гость").
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Список пользователей, связанные с данной ролью.
+        /// Список пользователей, которые имеют эту роль.
         /// </summary>
-        public ICollection<UserDb> Users { get; set; } = new List<UserDb>();
+        public List<RolesUsers> Users { get; set; }
     }
 }

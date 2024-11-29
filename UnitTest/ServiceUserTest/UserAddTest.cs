@@ -1,5 +1,4 @@
-﻿using _1.Tests;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Data;
 using Project.IService;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnitTest
+namespace UnitTest.ServiceUserTest
 {
     public class UserAddTest : ServiceUsersTests
     {
@@ -17,13 +16,13 @@ namespace UnitTest
         [Trait("Category", "Critical")]
         public void Add_ShouldAddUser()
         {
-            var user = new UserModel 
-            { 
-                
-                Name = "John", 
-                SecondName = "Smith", 
-                Age = 30, 
-                Wages = 12500, 
+            var user = new UserModel
+            {
+
+                Name = "John",
+                SecondName = "Smith",
+                Age = 30,
+                Wages = 12500,
                 DateOfBirth = new DateTime(2000, 12, 25)
             };
             user.FullName = $"{user.Name} {user.SecondName}";
