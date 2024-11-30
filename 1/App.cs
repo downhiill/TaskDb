@@ -35,7 +35,7 @@ namespace _1
                 .AddScoped<IServiceUsers, ServiceUser>()
                 .AddScoped<IServiceRoles, ServiceRoles>()
                 .AddScoped<IServiceProfession, ServiceProfession>()
-                .AddScoped<IServiceAccount, ServiceAccount>();
+                .AddScoped<ServiceAccount>();
 
             // Регистрируем все команды, которые реализуют ICommand
             RegisterCommands(serviceProvider);

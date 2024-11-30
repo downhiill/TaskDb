@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Project.Service
 {
-    public class ServiceAccount : IServiceAccount
+    public class ServiceAccount 
     {
         private readonly ApplicationContext _context;
 

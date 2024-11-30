@@ -1,15 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Project.Data.Configuration
 {
+    /// <summary>
+    /// Конфигурация сущности <see cref="UserInfo"/> для настройки модели базы данных.
+    /// </summary>
     public class UserInfoConfiguration : IEntityTypeConfiguration<UserInfo>
     {
+        /// <summary>
+        /// Настраивает сущность <see cref="UserInfo"/> для модели базы данных.
+        /// </summary>
+        /// <param name="builder">Построитель для конфигурации сущности.</param>
         public void Configure(EntityTypeBuilder<UserInfo> builder)
         {
             // Настройка ключа
