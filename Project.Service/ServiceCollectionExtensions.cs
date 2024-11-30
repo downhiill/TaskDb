@@ -54,6 +54,10 @@ namespace Project.Service
                         {
                             services.AddScoped<ServiceProfession>();
                         }
+                        else if (parameter.ParameterType == typeof(ServiceAccount))
+                        {
+                            services.AddScoped<ServiceAccount>();
+                        }
                     }
                 }
 

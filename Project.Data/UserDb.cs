@@ -74,5 +74,8 @@
         /// Список ролей, привязанных к пользователю.
         /// </summary>
         public List<RolesUsers> Roles { get; set; }
+
+        public UserInfo Info { get; set; }
+        public Account Account { get; set; }
     }
 }

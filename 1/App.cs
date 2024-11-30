@@ -34,7 +34,8 @@ namespace _1
                     options.UseSqlServer(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")))
                 .AddScoped<IServiceUsers, ServiceUser>()
                 .AddScoped<IServiceRoles, ServiceRoles>()
-                .AddScoped<IServiceProfession, ServiceProfession>();
+                .AddScoped<IServiceProfession, ServiceProfession>()
+                .AddScoped<IServiceAccount, ServiceAccount>();
 
             // Регистрируем все команды, которые реализуют ICommand
             RegisterCommands(serviceProvider);
