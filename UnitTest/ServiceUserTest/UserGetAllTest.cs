@@ -76,7 +76,6 @@ namespace UnitTest.ServiceUserTest
         public void GetAllUsers_ShouldReturnEmptyListWhenNoUsers()
         {
             using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
             // Проверяем, что в базе нет пользователей
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();

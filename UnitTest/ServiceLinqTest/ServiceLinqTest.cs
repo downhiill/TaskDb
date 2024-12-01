@@ -10,29 +10,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UnitTest.ServiceProfessionTest
+namespace UnitTest.ServiceLinqTest
 {
-    public class ServiceProfessionTest
+    public class ServiceLinqTest
     {
         /// <summary>
         /// Мокированное представление интерфейса IServiceUsers для тестирования.
         /// </summary>
-        protected readonly Mock<IServiceProfession> _mockServiceUsers;
+        protected readonly Mock<IServiceLinq> _mockServiceLinq;
 
         /// <summary>
         /// Сервис-поставщик, создающий и управляемый объектами с помощью внедрения зависимостей.
         /// </summary>
         protected readonly ServiceProvider _serviceProvider;
 
-        public ServiceProfessionTest()
+        public ServiceLinqTest()
         {
             // Инициализация мокированного интерфейса и DI контейнера
-            _mockServiceUsers = new Mock<IServiceProfession>();
+            _mockServiceLinq = new Mock<IServiceLinq>();
 
             _serviceProvider = new ServiceCollection()
                 .AddDbContext<ApplicationContext>(options =>
                     options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальная база данных для каждого теста
-                .AddScoped<IServiceProfession, ServiceProfession>() // Используем реальный сервис в DI
+                .AddScoped<IServiceLinq, ServiceLinq>() // Используем реальный сервис в DI
                 .BuildServiceProvider();
         }
     }
