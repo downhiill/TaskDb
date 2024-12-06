@@ -41,15 +41,26 @@ namespace Project.Service
 
         public void RemoveAccount(int userId)
         {
-            var account = _context.Account.Find(userId);
-            if (account != null)  // Проверяем, найден ли аккаунт
+            try
             {
-                _context.Account.Remove(account);  // Удаляем аккаунт из базы данных
-                _context.SaveChanges();  // Сохраняем изменения, чтобы удаление отразилось в базе данных
+                // Одним запросом находим и удаляем аккаунт
+                var account = _context.Account
+                    .Where(a => a.UserId == userId)
+                    .FirstOrDefault();
+
+                if (account == null)
+                {
+                    Console.WriteLine("Аккаунт не найден");
+                    return;
+                }
+
+                _context.Account.Remove(account); // Удаляем найденный аккаунт
+                _context.SaveChanges(); // Сохраняем изменения
+                Console.WriteLine("Аккаунт успешно удалён");
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Аккаунт не найден");  // Если аккаунт не найден, выводим сообщение
+                Console.WriteLine($"Произошла ошибка: {ex.Message}");
             }
         }
 
