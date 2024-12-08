@@ -25,35 +25,26 @@ public class ServiceUser : IServiceUsers
         // Проверяем, что имя не пустое
         if (string.IsNullOrWhiteSpace(user.Name))
         {
-            Console.WriteLine("Failed to add user: Name is empty or whitespace.");
-            return 0; // Возвращаем 0, если имя пустое
+            throw new ArgumentException("User name cannot be empty or whitespace.");
         }
 
         // Проверяем, что пользователь с таким именем уже существует
         if (_context.Users.Any(u => u.Name == user.Name))
         {
-            Console.WriteLine($"Failed to add user: Name '{user.Name}' already exists.");
-            return 0; // Возвращаем 0, если имя уже существует
+            throw new InvalidOperationException($"A user with the name '{user.Name}' already exists.");
         }
 
         var userDb = new UserDb
         {
             Name = user.Name,
-            Age = user.Age,
-            Wages = user.Wages,
-            DateOfBirth = user.DateOfBirth,
-            DateCreate = DateTime.UtcNow,
-            Active = true
+            Age = user.Age
         };
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
-        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
 
         return userDb.Id;
     }
-
-
 
     /// <summary>
     /// Изменяет имя пользователя.

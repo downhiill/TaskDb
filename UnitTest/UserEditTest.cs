@@ -14,17 +14,18 @@ namespace UnitTest
     public class UserEditTest : ServiceUsersTests
     {
         [Theory(DisplayName = "Изменение имени пользователя")]
-        [InlineData("John", "Johnny")]
-        [InlineData("Jane", "Janette")]
+        [MemberData(nameof(TestData.GetUsersForUpdateName), MemberType = typeof(TestData))]
         [Trait("Category", "Update")]
-        public void EditName_ShouldEditUserName(string originalName, string newName)
+        public void EditName_ShouldEditUserName(string originalName, string newName, bool expectedSuccess)
         {
             // Создаем новый скоуп для работы с контекстом
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Настраиваем мок для метода Add, чтобы добавить пользователя в базу
+            // Настроим мок для IServiceUsers
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
+
+            // Мокируем метод Add, чтобы добавить пользователя в базу
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
@@ -43,7 +44,7 @@ namespace UnitTest
                     return userDb.Id; // Возвращаем ID добавленного пользователя
                 });
 
-            // Мокаем метод EditName
+            // Мокируем метод EditName
             mockServiceUsers
                 .Setup(service => service.EditName(It.IsAny<int>(), It.IsAny<string>()))
                 .Callback<int, string>((userId, name) =>
@@ -51,8 +52,12 @@ namespace UnitTest
                     var userToUpdate = context.Users.FirstOrDefault(u => u.Id == userId);
                     if (userToUpdate != null)
                     {
-                        userToUpdate.Name = name; // Изменение имени пользователя
-                        context.SaveChanges();    // Сохранение изменений в базе данных
+                        userToUpdate.Name = name;
+                        context.SaveChanges();
+                    }
+                    else if (!expectedSuccess) // Если пользователь не найден и ожидается неуспешный результат
+                    {
+                        throw new InvalidOperationException($"User with ID {userId} does not exist.");
                     }
                 });
 
@@ -71,48 +76,39 @@ namespace UnitTest
 
             // Редактируем имя пользователя через реальный сервис
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            mockServiceUsers.Object.EditName(userId, newName);
+            try
+            {
+                mockServiceUsers.Object.EditName(userId, newName);
 
-            // Проверяем, что имя пользователя было изменено
-            var updatedUser = context.Users.Find(userId);
-            Assert.NotNull(updatedUser); // Убеждаемся, что пользователь существует
-            Assert.Equal(newName, updatedUser?.Name); // Проверяем новое имя
-        }
-
-        [Fact(DisplayName = "Изменение имени пользователя для несуществующего ID")]
-        [Trait("Category", "Update")]
-        public void EditName_ShouldNotEditNameForNonExistentUser()
-        {
-            // Создаем мок для IServiceUsers
-            var mockServiceUsers = new Mock<IServiceUsers>();
-
-            // Настраиваем мок метода EditName
-            mockServiceUsers
-                .Setup(service => service.EditName(It.IsAny<int>(), It.IsAny<string>()))
-                .Callback<int, string>((id, name) =>
+                if (expectedSuccess)
                 {
-                    if (id == 9999) // Проверяем несуществующий ID
-                        throw new InvalidOperationException($"User with ID {id} does not exist.");
-                });
-
-            var serviceUsers = mockServiceUsers.Object;
-
-            // Проверяем, что выбрасывается исключение при попытке изменить имя несуществующего пользователя
-            var exception = Assert.Throws<InvalidOperationException>(() =>
-                serviceUsers.EditName(9999, "NewName")
-            );
-
-            // Проверяем сообщение исключения
-            Assert.Equal("User with ID 9999 does not exist.", exception.Message);
-
-            // Убеждаемся, что вызов метода EditName был выполнен один раз с ожидаемыми параметрами
-            mockServiceUsers.Verify(service => service.EditName(9999, "NewName"), Times.Once);
+                    // Проверяем, что имя пользователя было изменено
+                    var updatedUser = context.Users.Find(userId);
+                    Assert.NotNull(updatedUser);
+                    Assert.Equal(newName, updatedUser?.Name);
+                }
+                else
+                {
+                    // Если изменение имени не должно было пройти, проверяем исключение
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mockServiceUsers.Object.EditName(9999, newName)
+                    );
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (expectedSuccess)
+                {
+                    // Если ожидался успешный результат, исключение не должно быть выброшено
+                    Assert.Null(ex);
+                }
+            }
         }
 
-
-        [Fact(DisplayName = "Изменение возраста пользователя")]
-        [Trait("Priority", "High")]
-        public void EditAge_ShouldEditUserAge()
+        [Theory(DisplayName = "Изменение возраста пользователя")]
+        [MemberData(nameof(TestData.GetUsersForUpdateAge), MemberType = typeof(TestData))]
+        [Trait("Category", "Update")]
+        public void EditAge_ShouldEditUserAge(int originalAge, int newAge, bool expectedSuccess)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
@@ -120,7 +116,7 @@ namespace UnitTest
             // Создаем мок для IServiceUsers
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
 
-            // Настраиваем мок для метода Add
+            // Настроим мок для метода Add
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
                 .Returns((UserModel user) =>
@@ -139,7 +135,7 @@ namespace UnitTest
                     return userDb.Id;
                 });
 
-            // Настраиваем мок для метода EditAge
+            // Настроим мок для метода EditAge
             mockServiceUsers
                 .Setup(service => service.EditAge(It.IsAny<int>(), It.IsAny<int>()))
                 .Callback<int, int>((id, newAge) =>
@@ -150,61 +146,55 @@ namespace UnitTest
                         user.Age = newAge;
                         context.SaveChanges();
                     }
+                    else if (!expectedSuccess) // Если пользователь не найден и ожидается неуспешный результат
+                    {
+                        throw new InvalidOperationException($"User with ID {id} does not exist.");
+                    }
                 });
 
             var serviceUsers = mockServiceUsers.Object;
 
-            // Добавляем пользователя через мок
-            var user = new UserModel { Name = "John", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
+            // Создаем тестового пользователя
+            var user = new UserModel
+            {
+                Name = "John",
+                Age = originalAge,
+                Wages = 12500,
+                DateOfBirth = new DateTime(2000, 12, 25)
+            };
             int userId = serviceUsers.Add(user);
 
-            // Изменяем возраст пользователя через мок
-            serviceUsers.EditAge(userId, 35);
+            // Пытаемся изменить возраст пользователя через мок
+            try
+            {
+                mockServiceUsers.Object.EditAge(userId, newAge);
 
-            // Проверяем, что возраст был изменен
-            var updatedUser = context.Users.Find(userId);
-            Assert.NotNull(updatedUser); // Убедиться, что пользователь существует
-            Assert.Equal(35, updatedUser?.Age); // Проверяем, что возраст обновился
+                if (expectedSuccess)
+                {
+                    // Проверяем, что возраст был изменен
+                    var updatedUser = context.Users.Find(userId);
+                    Assert.NotNull(updatedUser); // Убедиться, что пользователь существует
+                    Assert.Equal(newAge, updatedUser?.Age); // Проверяем новый возраст
+                }
+                else
+                {
+                    // Если изменение возраста не должно было пройти, проверяем исключение
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mockServiceUsers.Object.EditAge(9999, newAge)
+                    );
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (expectedSuccess)
+                {
+                    // Если ожидался успешный результат, исключение не должно быть выброшено
+                    Assert.Null(ex);
+                }
+            }
 
             // Убедиться, что метод EditAge был вызван один раз
-            mockServiceUsers.Verify(service => service.EditAge(userId, 35), Times.Once);
-        }
-
-        [Fact(DisplayName = "Изменение возраста пользователя для несуществующего ID")]
-        [Trait("Category", "Update")]
-        public void EditAge_ShouldNotEditAgeForNonExistentUser()
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-
-            // Создаем мок для IServiceUsers
-            var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
-
-            // Настраиваем мок для метода EditAge
-            mockServiceUsers
-                .Setup(service => service.EditAge(It.IsAny<int>(), It.IsAny<int>()))
-                .Callback<int, int>((id, newAge) =>
-                {
-                    // Попытка найти пользователя в контексте
-                    var user = context.Users.Find(id);
-                    if (user != null)
-                    {
-                        user.Age = newAge;
-                        context.SaveChanges();
-                    }
-                });
-
-            var serviceUsers = mockServiceUsers.Object;
-
-            // Попытка изменить возраст для несуществующего пользователя
-            serviceUsers.EditAge(9999, 35); // ID 9999 предполагается несуществующим
-
-            // Проверяем, что в базе данных нет пользователя с таким ID
-            var user = context.Users.FirstOrDefault(u => u.Id == 9999);
-            Assert.Null(user); // Пользователь с таким ID должен быть отсутствующим
-
-            // Проверяем, что метод EditAge был вызван один раз
-            mockServiceUsers.Verify(service => service.EditAge(9999, 35), Times.Once);
+            mockServiceUsers.Verify(service => service.EditAge(userId, newAge), Times.Once);
         }
 
         [Fact(DisplayName = "Изменение зарплаты пользователя")]

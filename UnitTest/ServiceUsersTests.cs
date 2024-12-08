@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+п»їusing Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Project.Data;
@@ -16,13 +16,13 @@ namespace _1.Tests
 
         public ServiceUsersTests()
         {
-            // Инициализация мокированного интерфейса и DI контейнера
+            // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРѕРєРёСЂРѕРІР°РЅРЅРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР° Рё DI РєРѕРЅС‚РµР№РЅРµСЂ
             _mockServiceUsers = new Mock<IServiceUsers>();
 
             _serviceProvider = new ServiceCollection()
                 .AddDbContext<ApplicationContext>(options =>
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальная база данных для каждого теста
-                .AddScoped<IServiceUsers, ServiceUser>() // Используем реальный сервис в DI
+                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // РЈРЅРёРєР°Р»СЊРЅР°СЏ Р±Р°Р·Р° РґР°РЅРЅС‹С… РґР»СЏ РєР°Р¶РґРѕРіРѕ С‚РµСЃС‚Р°
+                .AddScoped<IServiceUsers, ServiceUser>() // РСЃРїРѕР»СЊР·СѓРµРј СЂРµР°Р»СЊРЅС‹Р№ СЃРµСЂРІРёСЃ РІ DI
                 .BuildServiceProvider();
         }
     }
