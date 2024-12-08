@@ -12,14 +12,13 @@ namespace UnitTest.ServiceRoleTest
 {
     public class RoleDeleteTest : ServiceRoleTest
     {
-        [Fact(DisplayName = "Удаление роли у пользователя")]
+        [Theory(DisplayName = "Удаление роли у пользователя")]
         [Trait("Category", "Critical")]
-        public void UserRemoveRole_ShouldRemoveRoleFromUser()
+        [InlineData(1, EnumTypeRoleModel.Admin)]
+        [InlineData(2, EnumTypeRoleModel.User)]
+        [InlineData(3, EnumTypeRoleModel.Guest)]
+        public void UserRemoveRole_ShouldRemoveRoleFromUser(int userId, EnumTypeRoleModel role)
         {
-            // Данные для теста
-            int userId = 1;
-            var role = EnumTypeRoleModel.User;
-
             using var scope = _serviceProvider.CreateScope();
             var serviceMock = new Mock<IServiceRoles>();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();

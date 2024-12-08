@@ -79,7 +79,8 @@ namespace Project.Service
 
             if (deletedCount == 0)
             {
-                Console.WriteLine("Роль не найдена для этого пользователя.");
+                // Вместо вывода на консоль выбрасываем исключение
+                throw new InvalidOperationException($"Роль '{role}' не найдена для пользователя с ID {userId}.");
             }
         }
 
