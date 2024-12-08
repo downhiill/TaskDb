@@ -21,7 +21,7 @@ namespace UnitTest.ServiceRoleTest
 
             // Добавляем пользователей и роли в базу данных
             var role = new Role { Id = (EnumTypeRoleDb)1, Name = "Admin" };
-            var user1 = new UserDb { Id = 1, Name = "John",SecondName="Smith", DateOfBirth = new DateTime(1990, 1, 1) };
+            var user1 = new UserDb { Id = 1, Name = "John", SecondName = "Smith", DateOfBirth = new DateTime(1990, 1, 1) };
             user1.FullName = $"{user1.Name} {user1.SecondName}";
             var user2 = new UserDb { Id = 2, Name = "Jane", SecondName = "Smith", DateOfBirth = new DateTime(1992, 2, 2) };
             user2.FullName = $"{user2.Name} {user2.SecondName}";

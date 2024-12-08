@@ -1,14 +1,11 @@
 ﻿using Project.Data;
 using Project.IService;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Project.Service
 {
-    public class ServiceAccount 
+    public class ServiceAccount
     {
         private readonly ApplicationContext _context;
 
@@ -23,7 +20,6 @@ namespace Project.Service
 
         public void UpdateAccount(int userId, string login, string password)
         {
-
             // Находим аккаунт по userId
             var account = _context.Account.SingleOrDefault(a => a.UserId == userId);
             if (account == null)
@@ -41,33 +37,29 @@ namespace Project.Service
 
         public void RemoveAccount(int userId)
         {
-            try
-            {
-                // Одним запросом находим и удаляем аккаунт
-                var account = _context.Account
-                    .Where(a => a.UserId == userId)
-                    .FirstOrDefault();
+            // Находим аккаунт по userId
+            var account = _context.Account
+                .FirstOrDefault(a => a.UserId == userId);
 
-                if (account == null)
-                {
-                    Console.WriteLine("Аккаунт не найден");
-                    return;
-                }
-
-                _context.Account.Remove(account); // Удаляем найденный аккаунт
-                _context.SaveChanges(); // Сохраняем изменения
-                Console.WriteLine("Аккаунт успешно удалён");
-            }
-            catch (Exception ex)
+            if (account == null)
             {
-                Console.WriteLine($"Произошла ошибка: {ex.Message}");
+                throw new InvalidOperationException("Account not found for the given user ID.");
             }
+
+            // Удаляем найденный аккаунт
+            _context.Account.Remove(account);
+            _context.SaveChanges();
         }
 
         public Account GetAccount(int userId)
         {
-            return _context.Account.SingleOrDefault(a => a.UserId == userId);
+            var account = _context.Account.SingleOrDefault(a => a.UserId == userId);
+            if (account == null)
+            {
+                throw new InvalidOperationException("Account not found for the given user ID.");
+            }
 
+            return account;
         }
     }
 }
