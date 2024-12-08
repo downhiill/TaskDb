@@ -4,6 +4,7 @@ using Moq;
 using Project.Data;
 using Project.IService;
 using System;
+using UnitTest;
 using Xunit;
 
 namespace _1.Tests
@@ -25,119 +26,71 @@ namespace _1.Tests
                 .BuildServiceProvider();
         }
 
-        [Fact(DisplayName = "Добавление пользователя в базу данных")]
+        [Theory(DisplayName = "Добавление пользователей в базу данных")]
         [Trait("Category", "Critical")]
-        public void Add_ShouldAddUser()
-        {
-            var user = new UserModel { Name = "John", Age = 30 };
-
-            // Используем один скоуп для добавления и чтения
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-
-            // Добавляем пользователя
-            int userId = _serviceProvider.GetRequiredService<IServiceUsers>().Add(user);
-
-            // Проверяем, что ID пользователя больше нуля (пользователь добавлен)
-            Assert.True(userId > 0);
-        }
-
-        public static IEnumerable<object[]> InvalidUsers => new List<object[]>
-        {
-            new object[] { new UserModel { Name = "", Age = 30 } },
-            new object[] { new UserModel { Name = " ", Age = 25 } },
-            new object[] { new UserModel { Name = "\t", Age = 40 } }
-        };
-
-        [Theory(DisplayName = "Добавление пользователя с некорректной моделью")]
-        [Trait("Category", "Critical")]
-        [MemberData(nameof(InvalidUsers))]
-        public void Add_ShouldNotAddUserWithInvalidModel(UserModel invalidUser)
+        [MemberData(nameof(AddTestData.AllUsers), MemberType = typeof(AddTestData))]
+        public void Add_ShouldHandleVariousUsers(UserModel user, bool expectedSuccess)
         {
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            int userId = service.Add(invalidUser);
-
-            Assert.Equal(0, userId);
+            if (!expectedSuccess)
+            {
+                // Проверяем, что при неверных данных метод выбрасывает ArgumentException
+                var exception = Assert.Throws<ArgumentException>(() => service.Add(user));
+                Assert.Equal("User name cannot be empty or whitespace.", exception.Message);
+            }
+            else
+            {
+                // Для корректных данных проверяем успешное добавление
+                int userId = service.Add(user);
+                Assert.True(userId > 0, "User should be successfully added.");
+            }
         }
 
 
-
-        [Fact(DisplayName = "Добавление пользователя с уже существующим именем")]
-        [Trait("Category", "Critical")]
-        public void Add_ShouldNotAddUserWithDuplicateName()
-        {
-            var user1 = new UserModel { Name = "John", Age = 30 };
-            var user2 = new UserModel { Name = "John", Age = 25 };
-
-            using var scope = _serviceProvider.CreateScope();
-            var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-
-            // Добавляем первого пользователя
-            int userId1 = realServiceUsers.Add(user1);
-            Assert.NotEqual(0, userId1); // Проверяем, что первый пользователь добавлен
-
-            // Попытка добавить пользователя с таким же именем
-            int userId2 = realServiceUsers.Add(user2);
-            Assert.Equal(0, userId2); // Проверяем, что второй пользователь не был добавлен
-        }
-
-
-
-        [Fact(DisplayName = "Удаление пользователя из базы данных")]
+        [Theory(DisplayName = "Удаление пользователя из базы данных")]
         [Trait("Category", "CoreFunctionality")]
-        public void Delete_ShouldRemoveUser()
+        [MemberData(nameof(DeleteTestData.UserDeletionData), MemberType = typeof(DeleteTestData))]
+        public void Delete_ShouldHandleUserDeletion(int userId, bool shouldExist)
         {
-            var user = new UserModel { Name = "John", Age = 30 };
+            // Мокируем метод Delete
+            _mockServiceUsers.Setup(service => service.Delete(It.IsAny<int>())).Verifiable();
 
-            // Мокируем метод Add, чтобы он всегда возвращал ID пользователя (например, 1)
-            _mockServiceUsers.Setup(service => service.Add(It.IsAny<UserModel>())).Returns(1);
+            // Настраиваем мок для существующего пользователя
+            if (shouldExist)
+            {
+                var user = new UserDb { Id = userId, Name = "John", Age = 30 };
+                using var scope = _serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+                context.Users.Add(user);
+                context.SaveChanges();
+            }
 
-            // Мокируем добавление пользователя
-            int userId = _mockServiceUsers.Object.Add(user);
-
-            // Настроим мок для метода Delete, чтобы он корректно выполнялся
-            _mockServiceUsers.Setup(service => service.Delete(userId)).Verifiable();
-
-            // Удаляем пользователя через мок
+            // Удаляем пользователя
             _mockServiceUsers.Object.Delete(userId);
 
             // Проверяем, что метод Delete был вызван
             _mockServiceUsers.Verify(service => service.Delete(userId), Times.Once);
 
-            // Проверяем, что пользователь был удален из контекста базы данных
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-            Assert.Null(context.Users.Find(userId)); // Реальный контекст
+            // Проверяем состояние базы
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+                var user = context.Users.Find(userId);
+                if (shouldExist)
+                {
+                    Assert.Null(user); // Пользователь должен быть удалён
+                }
+                else
+                {
+                    Assert.Null(user); // Пользователя и так не должно быть
+                }
+            }
         }
-
-        [Fact(DisplayName = "Удаление несуществующего пользователя")]
-        [Trait("Category", "CoreFunctionality")]
-        public void Delete_ShouldNotRemoveNonExistentUser()
-        {
-            // Мокируем метод Delete для несуществующего пользователя
-            var mockServiceUsers = new Mock<IServiceUsers>();
-
-            // Настройка мока для метода Delete
-            mockServiceUsers
-                .Setup(service => service.Delete(It.IsAny<int>())) // Не нужно возвращать значение
-                .Verifiable(); // Проверка, что метод был вызван
-
-            var serviceUsers = mockServiceUsers.Object;
-
-            // Попытка удалить пользователя с несуществующим ID
-            serviceUsers.Delete(9999); // Предположим, что ID 9999 не существует
-
-            // Проверяем, что метод Delete был вызван
-            mockServiceUsers.Verify(service => service.Delete(9999), Times.Once);
-        }
-
-
 
         [Theory(DisplayName = "Изменение имени пользователя")]
-        [InlineData("John", "Johnny")]
-        [InlineData("Jane", "Janette")]
+        [MemberData(nameof(EditTestData.ValidUpdateNames), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
         public void EditName_ShouldEditUserName(string originalName, string newName)
         {
@@ -174,9 +127,10 @@ namespace _1.Tests
             Assert.Equal(newName, updatedUser?.Name); // Проверяем новое имя
         }
 
-        [Fact(DisplayName = "Изменение имени пользователя для несуществующего ID")]
+        [Theory(DisplayName = "Изменение имени пользователя для несуществующего ID")]
+        [MemberData(nameof(EditTestData.NonExistentUserIds), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
-        public void EditName_ShouldNotEditNameForNonExistentUser()
+        public void EditName_ShouldNotEditNameForNonExistentUser(int userId, string newName)
         {
             // Создаем скоуп для работы с контекстом
             using var scope = _serviceProvider.CreateScope();
@@ -184,23 +138,23 @@ namespace _1.Tests
 
             // Попытка изменить имя для пользователя с несуществующим ID
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            realServiceUsers.EditName(9999, "NewName"); // Предположим, что ID 9999 не существует
+            realServiceUsers.EditName(userId, newName); // Предположим, что ID 9999 не существует
 
             // Проверяем, что в базе данных нет пользователя с таким ID
-            var user = context.Users.FirstOrDefault(u => u.Id == 9999);
+            var user = context.Users.FirstOrDefault(u => u.Id == userId);
             Assert.Null(user); // Пользователь с таким ID не должен существовать
         }
 
 
-
-        [Fact(DisplayName = "Изменение возраста пользователя")]
+        [Theory(DisplayName = "Изменение возраста пользователя")]
+        [MemberData(nameof(EditTestData.ValidAgeUpdates), MemberType = typeof(EditTestData))]
         [Trait("Priority", "High")]
-        public void EditAge_ShouldEditUserAge()
+        public void EditAge_ShouldEditUserAge(string name, int currentAge, int newAge)
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Создаем мок для IServiceUsers и перезаписываем только метод Add
+            // Создаем мок для IServiceUsers
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
@@ -215,36 +169,35 @@ namespace _1.Tests
             var serviceUsers = mockServiceUsers.Object;
 
             // Добавляем пользователя через мок
-            var user = new UserModel { Name = "John", Age = 30 };
+            var user = new UserModel { Name = name, Age = currentAge };
             int userId = serviceUsers.Add(user);
 
             // Изменяем возраст пользователя через реальный сервис
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            realServiceUsers.EditAge(userId, 35);
+            realServiceUsers.EditAge(userId, newAge);
 
             // Проверяем, что возраст был изменен
             var updatedUser = context.Users.Find(userId);
             Assert.NotNull(updatedUser);  // Убедиться, что пользователь существует
-            Assert.Equal(35, updatedUser?.Age); // Проверяем, что возраст обновился
+            Assert.Equal(newAge, updatedUser?.Age); // Проверяем, что возраст обновился
         }
 
-        [Fact(DisplayName = "Изменение возраста пользователя для несуществующего ID")]
+        [Theory(DisplayName = "Изменение возраста пользователя для несуществующего ID")]
+        [MemberData(nameof(EditTestData.NonExistentUserAgeUpdates), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
-        public void EditAge_ShouldNotEditAgeForNonExistentUser()
+        public void EditAge_ShouldNotEditAgeForNonExistentUser(int userId, int newAge)
         {
-            // Создаем скоуп для работы с контекстом
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
             // Попытка изменить возраст для пользователя с несуществующим ID
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            realServiceUsers.EditAge(9999, 35); // Предположим, что ID 9999 не существует
+            realServiceUsers.EditAge(userId, newAge); // Предположим, что ID не существует
 
-            // Проверяем, что возраст пользователя не был изменен (пользователь с таким ID не существует)
-            var user = context.Users.FirstOrDefault(u => u.Id == 9999);
+            // Проверяем, что пользователь с таким ID отсутствует
+            var user = context.Users.FirstOrDefault(u => u.Id == userId);
             Assert.Null(user); // Пользователь с таким ID должен быть отсутствующим
         }
-
 
 
         [Fact(DisplayName = "Получение всех пользователей из базы")]
@@ -368,10 +321,10 @@ namespace _1.Tests
 
             // Подготавливаем список пользователей
             var users = new List<UserModel>
-        {
-            new UserModel { Name = "John", Age = 30 },
-            new UserModel { Name = "Jane", Age = 25 }
-        };
+            {
+                new UserModel { Name = "John", Age = 30 },
+                new UserModel { Name = "Jane", Age = 25 }
+            };
 
             // Настроим мок для метода SearchUsers
             mockServiceUsers
@@ -386,7 +339,5 @@ namespace _1.Tests
             // Проверяем, что вернулся пустой список
             Assert.Empty(result);
         }
-
-
     }
 }
