@@ -13,24 +13,37 @@ namespace UnitTest
     {
         [Theory(DisplayName = "Добавление пользователя в базу данных")]
         [Trait("Category", "Critical")]
-        [MemberData(nameof(TestData.GetUsersForAdd), MemberType = typeof(TestData))]
+        [MemberData(nameof(TestData.AllUsers), MemberType = typeof(TestData))]
         public void Add_ShouldAddUser(UserModel user, bool expectedSuccess)
         {
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            // Добавляем пользователя
-            int userId = service.Add(user);
-
-            // Проверяем, что результат соответствует ожиданиям
-            if (expectedSuccess)
+            if (!expectedSuccess)
             {
-                Assert.True(userId > 0); // Пользователь должен быть добавлен
+                // Ожидаем, что выбрасывается одно из исключений (ArgumentException или InvalidOperationException)
+                var exception = Assert.ThrowsAny<Exception>(() => service.Add(user));
+
+                if (user.Name == string.Empty || string.IsNullOrWhiteSpace(user.Name))
+                {
+                    // Если имя пустое, проверяем, что выбрасывается ArgumentException
+                    Assert.IsType<ArgumentException>(exception);
+                    Assert.Equal("User name cannot be empty or whitespace.", exception.Message);
+                }
+                else
+                {
+                    // Если имя не пустое, проверяем, что выбрасывается InvalidOperationException
+                    Assert.IsType<InvalidOperationException>(exception);
+                    Assert.Equal($"A user with the name '{user.Name}' already exists.", exception.Message);
+                }
             }
             else
             {
-                Assert.Equal(0, userId); // Пользователь не должен быть добавлен
+                // Для корректных данных проверяем успешное добавление
+                int userId = service.Add(user);
+                Assert.True(userId > 0, "User should be successfully added.");
             }
         }
+
     }
 }
