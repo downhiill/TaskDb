@@ -11,69 +11,38 @@ namespace UnitTest
 {
     public class UserAddTest : ServiceUsersTests
     {
-        [Fact(DisplayName = "Добавление пользователя в базу данных")]
+        [Theory(DisplayName = "Добавление пользователя в базу данных")]
         [Trait("Category", "Critical")]
-        public void Add_ShouldAddUser()
-        {
-            var user = new UserModel 
-            { 
-                
-                Name = "John", 
-                SecondName = "Smith", 
-                Age = 30, 
-                Wages = 12500, 
-                DateOfBirth = new DateTime(2000, 12, 25)
-            };
-            user.FullName = $"{user.Name} {user.SecondName}";
-
-            // Используем один скоуп для добавления и чтения
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-
-            // Добавляем пользователя
-            int userId = _serviceProvider.GetRequiredService<IServiceUsers>().Add(user);
-
-            // Проверяем, что ID пользователя больше нуля (пользователь добавлен)
-            Assert.True(userId > 0);
-        }
-
-
-
-        [Theory(DisplayName = "Добавление пользователя с некорректной моделью")]
-        [Trait("Category", "Critical")]
-        [MemberData(nameof(TestData.InvalidUsers), MemberType = typeof(TestData))]
-        public void Add_ShouldNotAddUserWithInvalidModel(UserModel invalidUser)
+        [MemberData(nameof(TestData.AllUsers), MemberType = typeof(TestData))]
+        public void Add_ShouldAddUser(UserModel user, bool expectedSuccess)
         {
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            int userId = service.Add(invalidUser);
+            if (!expectedSuccess)
+            {
+                // Ожидаем, что выбрасывается одно из исключений (ArgumentException или InvalidOperationException)
+                var exception = Assert.ThrowsAny<Exception>(() => service.Add(user));
 
-            Assert.Equal(0, userId);
-        }
-
-
-
-        [Fact(DisplayName = "Добавление пользователя с уже существующим именем")]
-        [Trait("Category", "Critical")]
-        public void Add_ShouldNotAddUserWithDuplicateName()
-        {
-            var user1 = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
-            user1.FullName = $"{user1.Name} {user1.SecondName}";
-            var user2 = new UserModel { Name = "John", SecondName = "Smith", Age = 25, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
-            user2.FullName = $"{user2.Name} {user2.SecondName}";
-
-
-            using var scope = _serviceProvider.CreateScope();
-            var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-
-            // Добавляем первого пользователя
-            int userId1 = realServiceUsers.Add(user1);
-            Assert.NotEqual(0, userId1); // Проверяем, что первый пользователь добавлен
-
-            // Попытка добавить пользователя с таким же именем
-            int userId2 = realServiceUsers.Add(user2);
-            Assert.Equal(0, userId2); // Проверяем, что второй пользователь не был добавлен
+                if (user.Name == string.Empty || string.IsNullOrWhiteSpace(user.Name))
+                {
+                    // Если имя пустое, проверяем, что выбрасывается ArgumentException
+                    Assert.IsType<ArgumentException>(exception);
+                    Assert.Equal("User name cannot be empty or whitespace.", exception.Message);
+                }
+                else
+                {
+                    // Если имя не пустое, проверяем, что выбрасывается InvalidOperationException
+                    Assert.IsType<InvalidOperationException>(exception);
+                    Assert.Equal($"A user with the name '{user.Name}' already exists.", exception.Message);
+                }
+            }
+            else
+            {
+                // Для корректных данных проверяем успешное добавление
+                int userId = service.Add(user);
+                Assert.True(userId > 0, "User should be successfully added.");
+            }
         }
 
     }

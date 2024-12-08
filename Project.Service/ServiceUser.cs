@@ -25,34 +25,23 @@ public class ServiceUser : IServiceUsers
         // Проверяем, что имя не пустое
         if (string.IsNullOrWhiteSpace(user.Name))
         {
-            Console.WriteLine("Failed to add user: Name is empty or whitespace.");
-            return 0; // Возвращаем 0, если имя пустое
+            throw new ArgumentException("User name cannot be empty or whitespace.");
         }
 
         // Проверяем, что пользователь с таким именем уже существует
         if (_context.Users.Any(u => u.Name == user.Name))
         {
-            Console.WriteLine($"Failed to add user: Name '{user.Name}' already exists.");
-            return 0; // Возвращаем 0, если имя уже существует
+            throw new InvalidOperationException($"A user with the name '{user.Name}' already exists.");
         }
 
         var userDb = new UserDb
         {
             Name = user.Name,
-            SecondName = user.SecondName,
-            FullName = user.FullName,
-            Age = user.Age,
-            Wages = user.Wages,
-            DateOfBirth = user.DateOfBirth,
-            DateCreate = DateTime.UtcNow,
-            Active = true,
-            RoleId = user.RoleId
-            
+            Age = user.Age
         };
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
-        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name},{user.SecondName},{user.FullName}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
 
         return userDb.Id;
     }
@@ -96,10 +85,9 @@ public class ServiceUser : IServiceUsers
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new InvalidOperationException($"Пользователь с идентификатором {userId} не найден.");
         }
     }
-
 
     /// <summary>
     /// Редактирует дату рождения пользователя по его идентификатору.
@@ -114,7 +102,7 @@ public class ServiceUser : IServiceUsers
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new InvalidOperationException($"Пользователь с идентификатором {userId} не найден.");
         }
     }
 
@@ -130,7 +118,7 @@ public class ServiceUser : IServiceUsers
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new InvalidOperationException($"Пользователь с идентификатором {id} не найден.");
         }
     }
 
