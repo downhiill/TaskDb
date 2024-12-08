@@ -12,14 +12,13 @@ namespace UnitTest.ServiceRoleTest
 {
     public class RoleAddTest : ServiceRoleTest
     {
-        [Fact(DisplayName = "Добавление роли пользователю")]
+        [Theory(DisplayName = "Добавление роли пользователю")]
         [Trait("Category", "Critical")]
-        public void UserAddRole_ShouldAddRoleToUser()
+        [InlineData(1, EnumTypeRoleModel.Admin)]
+        [InlineData(2, EnumTypeRoleModel.User)]
+        [InlineData(3, EnumTypeRoleModel.Guest)]
+        public void UserAddRole_ShouldAddRoleToUser(int userId, EnumTypeRoleModel role)
         {
-            // Данные для теста
-            int userId = 1;
-            var role = EnumTypeRoleModel.Admin;
-
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceRoles>();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();

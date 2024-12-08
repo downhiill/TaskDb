@@ -12,20 +12,14 @@ namespace UnitTest.ServiceRoleTest
 {
     public class RoleGetRolesUser : ServiceRoleTest
     {
-        [Fact(DisplayName = "Получение ролей пользователя")]
+        [Theory(DisplayName = "Получение ролей пользователя")]
         [Trait("Category", "Critical")]
-        public void GetRolesUser_ShouldReturnUserRoles()
+        [InlineData(1, 2, new EnumTypeRoleModel[] { EnumTypeRoleModel.User, EnumTypeRoleModel.Admin })]
+        [InlineData(2, 0, new EnumTypeRoleModel[] { })]
+        public void GetRolesUser_ShouldReturnUserRoles(int userId, int expectedRoleCount, EnumTypeRoleModel[] expectedRoles)
         {
-            // Данные для теста
-            int userId = 1;
-            var roles = new List<EnumTypeRoleModel> { EnumTypeRoleModel.User, EnumTypeRoleModel.Admin };
-
-            // Создание модели ролей для мока
-            var userRoles = new List<RoleModel>
-            {
-                new RoleModel { Id = EnumTypeRoleModel.User, Name = "User" },
-                new RoleModel { Id = EnumTypeRoleModel.Admin, Name = "Admin" }
-            };
+            // Создание мока для возвращаемых ролей
+            var userRoles = expectedRoles.Select(role => new RoleModel { Id = role, Name = role.ToString() }).ToList();
 
             // Мокируем метод GetRolesUser
             _mockServiceRoles
@@ -38,10 +32,14 @@ namespace UnitTest.ServiceRoleTest
             // Получаем роли пользователя через мок
             var result = service.GetRolesUser(userId);
 
-            // Проверяем, что роли получены правильно
-            Assert.Equal(roles.Count, result.Count);
-            Assert.Contains(result, role => role.Id == EnumTypeRoleModel.User);
-            Assert.Contains(result, role => role.Id == EnumTypeRoleModel.Admin);
+            // Проверяем, что количество ролей совпадает с ожидаемым
+            Assert.Equal(expectedRoleCount, result.Count);
+
+            // Проверяем, что все ожидаемые роли присутствуют в результатах
+            foreach (var expectedRole in expectedRoles)
+            {
+                Assert.Contains(result, role => role.Id == expectedRole);
+            }
         }
     }
 }

@@ -11,22 +11,18 @@ namespace UnitTest.ServiceRoleTest
 {
     public class RoleEditTest : ServiceRoleTest
     {
-        [Fact(DisplayName = "Изменение ролей пользователя")]
+        [Theory(DisplayName = "Изменение ролей пользователя")]
         [Trait("Category", "Critical")]
-        public void UserChangeRole_ShouldUpdateUserRoles()
+        [InlineData(1, new[] { EnumTypeRoleModel.User, EnumTypeRoleModel.Admin })]
+        [InlineData(2, new[] { EnumTypeRoleModel.Guest, EnumTypeRoleModel.User })]
+        [InlineData(3, new[] { EnumTypeRoleModel.Admin, EnumTypeRoleModel.Guest })]
+        public void UserChangeRole_ShouldUpdateUserRoles(int userId, EnumTypeRoleModel[] roles)
         {
-            // Данные для теста
-            int userId = 1;
-            var roles = new List<EnumTypeRoleModel> { EnumTypeRoleModel.User, EnumTypeRoleModel.Admin };
-
             using var scope = _serviceProvider.CreateScope();
             var service = scope.ServiceProvider.GetRequiredService<IServiceRoles>();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Добавляем старую роль
-            service.UserAddRole(userId, EnumTypeRoleModel.User);
-
-            // Изменяем роли: удаляем старые и добавляем новые
+            // Удаляем старые роли пользователя, если они есть
             var oldRoles = context.RolesUsers.Where(ru => ru.UserId == userId).ToList();
             context.RolesUsers.RemoveRange(oldRoles);
             context.SaveChanges();
@@ -39,9 +35,13 @@ namespace UnitTest.ServiceRoleTest
 
             // Проверяем, что роли обновлены
             var roleUsers = context.RolesUsers.Where(ru => ru.UserId == userId).ToList();
-            Assert.Equal(roles.Count, roleUsers.Count);
-            Assert.Contains(roleUsers, ru => ru.RoleId == (EnumTypeRoleDb)EnumTypeRoleModel.User);
-            Assert.Contains(roleUsers, ru => ru.RoleId == (EnumTypeRoleDb)EnumTypeRoleModel.Admin);
+            Assert.Equal(roles.Length, roleUsers.Count);  // Проверка, что количество ролей совпадает
+
+            // Проверяем, что каждая роль была добавлена
+            foreach (var role in roles)
+            {
+                Assert.Contains(roleUsers, ru => ru.RoleId == (EnumTypeRoleDb)role);
+            }
         }
     }
 }
