@@ -13,12 +13,11 @@ namespace UnitTest
 {
     public class UserDeleteTest : ServiceUsersTests
     {
-        [Fact(DisplayName = "Удаление пользователя из базы данных")]
+        [Theory(DisplayName = "Удаление пользователя из базы данных")]
         [Trait("Category", "CoreFunctionality")]
-        public void Delete_ShouldRemoveUser()
+        [MemberData(nameof(TestData.ValidUsers), MemberType = typeof(TestData))]
+        public void Delete_ShouldRemoveUser(UserModel user, bool expectedResult)
         {
-            var user = new UserModel { Name = "John", SecondName = "Smith", Age = 30, Wages = 12500, DateOfBirth = new DateTime(2000, 12, 25) };
-
             // Мокируем метод Add, чтобы он всегда возвращал ID пользователя (например, 1)
             _mockServiceUsers.Setup(service => service.Add(It.IsAny<UserModel>())).Returns(1);
 
@@ -40,9 +39,10 @@ namespace UnitTest
             Assert.Null(context.Users.Find(userId)); // Реальный контекст
         }
 
-        [Fact(DisplayName = "Удаление несуществующего пользователя")]
+        [Theory(DisplayName = "Удаление несуществующего пользователя")]
         [Trait("Category", "CoreFunctionality")]
-        public void Delete_ShouldNotRemoveNonExistentUser()
+        [MemberData(nameof(TestData.InvalidUsers), MemberType = typeof(TestData))]
+        public void Delete_ShouldNotRemoveNonExistentUser(UserModel user, bool expectedResult)
         {
             // Мокируем метод Delete для несуществующего пользователя
             var mockServiceUsers = new Mock<IServiceUsers>();
@@ -61,16 +61,17 @@ namespace UnitTest
             mockServiceUsers.Verify(service => service.Delete(9999), Times.Once);
         }
 
-        [Fact(DisplayName = "Удаление профессии")]
+        [Theory(DisplayName = "Удаление профессии")]
         [Trait("Category", "Critical")]
-        public void DeleteProfession_ShouldRemoveProfessionSuccessfully()
+        [MemberData(nameof(TestData.ValidProfessions), MemberType = typeof(TestData))]
+        public void DeleteProfession_ShouldRemoveProfessionSuccessfully(string professionName, bool expectedResult)
         {
             // Arrange
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
             // Добавляем тестовую профессию в реальную базу данных
-            var profession = new Profession { Name = "Engineer" };
+            var profession = new Profession { Name = professionName };
             context.Professions.Add(profession);
             context.SaveChanges();
 
@@ -100,10 +101,10 @@ namespace UnitTest
             Assert.Null(deletedProfession); // Профессия должна быть удалена
         }
 
-
-        [Fact(DisplayName = "Удаление профессии - профессия не найдена")]
+        [Theory(DisplayName = "Удаление профессии - профессия не найдена")]
         [Trait("Category", "Critical")]
-        public void DeleteProfession_ShouldHandleProfessionNotFound()
+        [MemberData(nameof(TestData.InvalidProfessions), MemberType = typeof(TestData))]
+        public void DeleteProfession_ShouldHandleProfessionNotFound(string professionName, bool expectedResult)
         {
             // Arrange
             using var scope = _serviceProvider.CreateScope();

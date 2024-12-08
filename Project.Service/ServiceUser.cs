@@ -25,15 +25,13 @@ public class ServiceUser : IServiceUsers
         // Проверяем, что имя не пустое
         if (string.IsNullOrWhiteSpace(user.Name))
         {
-            Console.WriteLine("Failed to add user: Name is empty or whitespace.");
-            return 0; // Возвращаем 0, если имя пустое
+            throw new ArgumentException("User name cannot be empty or whitespace.");
         }
 
         // Проверяем, что пользователь с таким именем уже существует
         if (_context.Users.Any(u => u.Name == user.Name))
         {
-            Console.WriteLine($"Failed to add user: Name '{user.Name}' already exists.");
-            return 0; // Возвращаем 0, если имя уже существует
+            throw new InvalidOperationException($"A user with the name '{user.Name}' already exists.");
         }
 
         var userDb = new UserDb
@@ -52,7 +50,6 @@ public class ServiceUser : IServiceUsers
 
         _context.Users.Add(userDb);
         _context.SaveChanges();
-        Console.WriteLine($"User added: {userDb.Id}, {userDb.Name},{user.SecondName},{user.FullName}, {userDb.Age}, {userDb.DateOfBirth}, {userDb.Wages}, {userDb.DateCreate}, {userDb.Active}");
 
         return userDb.Id;
     }
@@ -116,13 +113,13 @@ public class ServiceUser : IServiceUsers
     /// <param name="wages">Новая заработная плата пользователя.</param>
     public void EditWages(int userId, decimal wages)
     {
-        int affectedRows = _context.Users
+        var affectedRows = _context.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdate(update => update.SetProperty(u => u.Wages, wages));
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
     }
 
@@ -134,13 +131,13 @@ public class ServiceUser : IServiceUsers
     /// <param name="dateOfBirth">Новая дата рождения пользователя.</param>
     public void EditDateOfBirth(int userId, DateTime dateOfBirth)
     {
-        int affectedRows = _context.Users
+        var affectedRows = _context.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdate(update => update.SetProperty(u => u.DateOfBirth, dateOfBirth));
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
     }
 
@@ -152,13 +149,13 @@ public class ServiceUser : IServiceUsers
     /// <remarks>Если пользователь с указанным идентификатором не найден, выводится сообщение.</remarks>
     public void EditProfessionUser(int userId, int? professionId)
     {
-        int affectedRows = _context.Users
+        var affectedRows = _context.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdate(update => update.SetProperty(u => u.ProfessionId, professionId));
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
     }
     /// <summary>
@@ -167,13 +164,13 @@ public class ServiceUser : IServiceUsers
     /// <param name="id">Идентификатор пользователя, которого нужно удалить.</param>
     public void Delete(int id)
     {
-        int affectedRows = _context.Users
+        var affectedRows = _context.Users
             .Where(u => u.Id == id)
             .ExecuteDelete();
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Пользователь не найден.");
+            throw new KeyNotFoundException($"User with ID {id} not found.");
         }
     }
 
@@ -184,13 +181,13 @@ public class ServiceUser : IServiceUsers
     /// <remarks>Если профессия с указанным идентификатором не найдена, выводится сообщение.</remarks>
     public void DeleteProfession(int professionId)
     {
-        int affectedRows = _context.Professions
+        var affectedRows = _context.Professions
             .Where(p => p.Id == professionId)
             .ExecuteDelete();
 
         if (affectedRows == 0)
         {
-            Console.WriteLine("Профессия не найдена.");
+            throw new KeyNotFoundException($"Profession with ID {professionId} not found.");
         }
     }
     /// <summary>
