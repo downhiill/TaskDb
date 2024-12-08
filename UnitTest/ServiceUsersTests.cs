@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+п»їusing Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Project.Data;
@@ -16,17 +16,17 @@ namespace _1.Tests
 
         public ServiceUsersTests()
         {
-            // Инициализация мокированного интерфейса и DI контейнера
+            // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРѕРєРёСЂРѕРІР°РЅРЅРѕРіРѕ РёРЅС‚РµСЂС„РµР№СЃР° Рё DI РєРѕРЅС‚РµР№РЅРµСЂР°
             _mockServiceUsers = new Mock<IServiceUsers>();
 
             _serviceProvider = new ServiceCollection()
                 .AddDbContext<ApplicationContext>(options =>
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // Уникальная база данных для каждого теста
-                .AddScoped<IServiceUsers, ServiceUser>() // Используем реальный сервис в DI
+                    options.UseInMemoryDatabase(Guid.NewGuid().ToString())) // РЈРЅРёРєР°Р»СЊРЅР°СЏ Р±Р°Р·Р° РґР°РЅРЅС‹С… РґР»СЏ РєР°Р¶РґРѕРіРѕ С‚РµСЃС‚Р°
+                .AddScoped<IServiceUsers, ServiceUser>() // РСЃРїРѕР»СЊР·СѓРµРј СЂРµР°Р»СЊРЅС‹Р№ СЃРµСЂРІРёСЃ РІ DI
                 .BuildServiceProvider();
         }
 
-        [Theory(DisplayName = "Добавление пользователей в базу данных")]
+        [Theory(DisplayName = "Р”РѕР±Р°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РІ Р±Р°Р·Сѓ РґР°РЅРЅС‹С…")]
         [Trait("Category", "Critical")]
         [MemberData(nameof(AddTestData.AllUsers), MemberType = typeof(AddTestData))]
         public void Add_ShouldHandleVariousUsers(UserModel user, bool expectedSuccess)
@@ -36,28 +36,28 @@ namespace _1.Tests
 
             if (!expectedSuccess)
             {
-                // Проверяем, что при неверных данных метод выбрасывает ArgumentException
+                // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїСЂРё РЅРµРІРµСЂРЅС‹С… РґР°РЅРЅС‹С… РјРµС‚РѕРґ РІС‹Р±СЂР°СЃС‹РІР°РµС‚ ArgumentException
                 var exception = Assert.Throws<ArgumentException>(() => service.Add(user));
                 Assert.Equal("User name cannot be empty or whitespace.", exception.Message);
             }
             else
             {
-                // Для корректных данных проверяем успешное добавление
+                // Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅС‹С… РґР°РЅРЅС‹С… РїСЂРѕРІРµСЂСЏРµРј СѓСЃРїРµС€РЅРѕРµ РґРѕР±Р°РІР»РµРЅРёРµ
                 int userId = service.Add(user);
                 Assert.True(userId > 0, "User should be successfully added.");
             }
         }
 
 
-        [Theory(DisplayName = "Удаление пользователя из базы данных")]
+        [Theory(DisplayName = "РЈРґР°Р»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· Р±Р°Р·С‹ РґР°РЅРЅС‹С…")]
         [Trait("Category", "CoreFunctionality")]
         [MemberData(nameof(DeleteTestData.UserDeletionData), MemberType = typeof(DeleteTestData))]
         public void Delete_ShouldHandleUserDeletion(int userId, bool shouldExist)
         {
-            // Мокируем метод Delete
+            // РњРѕРєРёСЂСѓРµРј РјРµС‚РѕРґ Delete
             _mockServiceUsers.Setup(service => service.Delete(It.IsAny<int>())).Verifiable();
 
-            // Настраиваем мок для существующего пользователя
+            // РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРє РґР»СЏ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
             if (shouldExist)
             {
                 var user = new UserDb { Id = userId, Name = "John", Age = 30 };
@@ -67,38 +67,38 @@ namespace _1.Tests
                 context.SaveChanges();
             }
 
-            // Удаляем пользователя
+            // РЈРґР°Р»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
             _mockServiceUsers.Object.Delete(userId);
 
-            // Проверяем, что метод Delete был вызван
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РјРµС‚РѕРґ Delete Р±С‹Р» РІС‹Р·РІР°РЅ
             _mockServiceUsers.Verify(service => service.Delete(userId), Times.Once);
 
-            // Проверяем состояние базы
+            // РџСЂРѕРІРµСЂСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ Р±Р°Р·С‹
             using (var scope = _serviceProvider.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
                 var user = context.Users.Find(userId);
                 if (shouldExist)
                 {
-                    Assert.Null(user); // Пользователь должен быть удалён
+                    Assert.Null(user); // РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СѓРґР°Р»С‘РЅ
                 }
                 else
                 {
-                    Assert.Null(user); // Пользователя и так не должно быть
+                    Assert.Null(user); // РџРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рё С‚Р°Рє РЅРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ
                 }
             }
         }
 
-        [Theory(DisplayName = "Изменение имени пользователя")]
+        [Theory(DisplayName = "РР·РјРµРЅРµРЅРёРµ РёРјРµРЅРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ")]
         [MemberData(nameof(EditTestData.ValidUpdateNames), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
         public void EditName_ShouldEditUserName(string originalName, string newName)
         {
-            // Создаем новый скоуп для работы с контекстом
+            // РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ СЃРєРѕСѓРї РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Настраиваем мок для метода Add, чтобы добавить пользователя в базу
+            // РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРє РґР»СЏ РјРµС‚РѕРґР° Add, С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ Р±Р°Р·Сѓ
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
@@ -107,46 +107,46 @@ namespace _1.Tests
                     var userDb = new UserDb { Name = user.Name, Age = user.Age };
                     context.Users.Add(userDb);
                     context.SaveChanges();
-                    return userDb.Id; // Возвращаем ID добавленного пользователя
+                    return userDb.Id; // Р’РѕР·РІСЂР°С‰Р°РµРј ID РґРѕР±Р°РІР»РµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
                 });
 
-            // Создаем тестового пользователя
+            // РЎРѕР·РґР°РµРј С‚РµСЃС‚РѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
             var user = new UserModel { Name = originalName, Age = 30 };
             var serviceUsers = mockServiceUsers.Object;
 
-            // Добавляем пользователя через мок
+            // Р”РѕР±Р°РІР»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· РјРѕРє
             int userId = serviceUsers.Add(user);
 
-            // Редактируем имя пользователя через реальный сервис
+            // Р РµРґР°РєС‚РёСЂСѓРµРј РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· СЂРµР°Р»СЊРЅС‹Р№ СЃРµСЂРІРёСЃ
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
             realServiceUsers.EditName(userId, newName);
 
-            // Проверяем, что имя пользователя было изменено
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Р±С‹Р»Рѕ РёР·РјРµРЅРµРЅРѕ
             var updatedUser = context.Users.Find(userId);
-            Assert.NotNull(updatedUser); // Убеждаемся, что пользователь существует
-            Assert.Equal(newName, updatedUser?.Name); // Проверяем новое имя
+            Assert.NotNull(updatedUser); // РЈР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚
+            Assert.Equal(newName, updatedUser?.Name); // РџСЂРѕРІРµСЂСЏРµРј РЅРѕРІРѕРµ РёРјСЏ
         }
 
-        [Theory(DisplayName = "Изменение имени пользователя для несуществующего ID")]
+        [Theory(DisplayName = "РР·РјРµРЅРµРЅРёРµ РёРјРµРЅРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ ID")]
         [MemberData(nameof(EditTestData.NonExistentUserIds), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
         public void EditName_ShouldNotEditNameForNonExistentUser(int userId, string newName)
         {
-            // Создаем скоуп для работы с контекстом
+            // РЎРѕР·РґР°РµРј СЃРєРѕСѓРї РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Попытка изменить имя для пользователя с несуществующим ID
+            // РџРѕРїС‹С‚РєР° РёР·РјРµРЅРёС‚СЊ РёРјСЏ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРј ID
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            realServiceUsers.EditName(userId, newName); // Предположим, что ID 9999 не существует
+            realServiceUsers.EditName(userId, newName); // РџСЂРµРґРїРѕР»РѕР¶РёРј, С‡С‚Рѕ ID 9999 РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
 
-            // Проверяем, что в базе данных нет пользователя с таким ID
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІ Р±Р°Р·Рµ РґР°РЅРЅС‹С… РЅРµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ С‚Р°РєРёРј ID
             var user = context.Users.FirstOrDefault(u => u.Id == userId);
-            Assert.Null(user); // Пользователь с таким ID не должен существовать
+            Assert.Null(user); // РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј ID РЅРµ РґРѕР»Р¶РµРЅ СЃСѓС‰РµСЃС‚РІРѕРІР°С‚СЊ
         }
 
 
-        [Theory(DisplayName = "Изменение возраста пользователя")]
+        [Theory(DisplayName = "РР·РјРµРЅРµРЅРёРµ РІРѕР·СЂР°СЃС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ")]
         [MemberData(nameof(EditTestData.ValidAgeUpdates), MemberType = typeof(EditTestData))]
         [Trait("Priority", "High")]
         public void EditAge_ShouldEditUserAge(string name, int currentAge, int newAge)
@@ -154,7 +154,7 @@ namespace _1.Tests
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Создаем мок для IServiceUsers
+            // РЎРѕР·РґР°РµРј РјРѕРє РґР»СЏ IServiceUsers
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
@@ -168,21 +168,21 @@ namespace _1.Tests
 
             var serviceUsers = mockServiceUsers.Object;
 
-            // Добавляем пользователя через мок
+            // Р”РѕР±Р°РІР»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· РјРѕРє
             var user = new UserModel { Name = name, Age = currentAge };
             int userId = serviceUsers.Add(user);
 
-            // Изменяем возраст пользователя через реальный сервис
+            // РР·РјРµРЅСЏРµРј РІРѕР·СЂР°СЃС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‡РµСЂРµР· СЂРµР°Р»СЊРЅС‹Р№ СЃРµСЂРІРёСЃ
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
             realServiceUsers.EditAge(userId, newAge);
 
-            // Проверяем, что возраст был изменен
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІРѕР·СЂР°СЃС‚ Р±С‹Р» РёР·РјРµРЅРµРЅ
             var updatedUser = context.Users.Find(userId);
-            Assert.NotNull(updatedUser);  // Убедиться, что пользователь существует
-            Assert.Equal(newAge, updatedUser?.Age); // Проверяем, что возраст обновился
+            Assert.NotNull(updatedUser);  // РЈР±РµРґРёС‚СЊСЃСЏ, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚
+            Assert.Equal(newAge, updatedUser?.Age); // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІРѕР·СЂР°СЃС‚ РѕР±РЅРѕРІРёР»СЃСЏ
         }
 
-        [Theory(DisplayName = "Изменение возраста пользователя для несуществующего ID")]
+        [Theory(DisplayName = "РР·РјРµРЅРµРЅРёРµ РІРѕР·СЂР°СЃС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ ID")]
         [MemberData(nameof(EditTestData.NonExistentUserAgeUpdates), MemberType = typeof(EditTestData))]
         [Trait("Category", "Update")]
         public void EditAge_ShouldNotEditAgeForNonExistentUser(int userId, int newAge)
@@ -190,68 +190,68 @@ namespace _1.Tests
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Попытка изменить возраст для пользователя с несуществующим ID
+            // РџРѕРїС‹С‚РєР° РёР·РјРµРЅРёС‚СЊ РІРѕР·СЂР°СЃС‚ РґР»СЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРј ID
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
-            realServiceUsers.EditAge(userId, newAge); // Предположим, что ID не существует
+            realServiceUsers.EditAge(userId, newAge); // РџСЂРµРґРїРѕР»РѕР¶РёРј, С‡С‚Рѕ ID РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
 
-            // Проверяем, что пользователь с таким ID отсутствует
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј ID РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚
             var user = context.Users.FirstOrDefault(u => u.Id == userId);
-            Assert.Null(user); // Пользователь с таким ID должен быть отсутствующим
+            Assert.Null(user); // РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј ID РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РёРј
         }
 
 
-        [Fact(DisplayName = "Получение всех пользователей из базы")]
+        [Fact(DisplayName = "РџРѕР»СѓС‡РµРЅРёРµ РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РёР· Р±Р°Р·С‹")]
         [Trait("Priority", "High")]
         public void GetAllUsers_ShouldReturnAllUsers()
         {
-            // Подготавливаем список пользователей
+            // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             var users = new List<UserModel>
             {
                 new UserModel { Name = "John", Age = 30 },
                 new UserModel { Name = "Jane", Age = 25 }
             };
 
-            // Настраиваем мок для метода GetAllUsers
+            // РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРє РґР»СЏ РјРµС‚РѕРґР° GetAllUsers
             _mockServiceUsers.Setup(service => service.GetAllUsers()).Returns(users);
 
-            // Вызываем реальный метод GetAllUsers через мок
+            // Р’С‹Р·С‹РІР°РµРј СЂРµР°Р»СЊРЅС‹Р№ РјРµС‚РѕРґ GetAllUsers С‡РµСЂРµР· РјРѕРє
             var result = _mockServiceUsers.Object.GetAllUsers();
 
-            // Проверяем, что количество пользователей корректно
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РєРѕСЂСЂРµРєС‚РЅРѕ
             Assert.Equal(2, result.Count);
 
-            // Проверяем, что все пользователи возвращаются правильно
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЃРµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё РІРѕР·РІСЂР°С‰Р°СЋС‚СЃСЏ РїСЂР°РІРёР»СЊРЅРѕ
             Assert.Contains(result, user => user.Name == "John" && user.Age == 30);
             Assert.Contains(result, user => user.Name == "Jane" && user.Age == 25);
         }
 
-        [Fact(DisplayName = "Получение всех пользователей, когда база данных пуста")]
+        [Fact(DisplayName = "РџРѕР»СѓС‡РµРЅРёРµ РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№, РєРѕРіРґР° Р±Р°Р·Р° РґР°РЅРЅС‹С… РїСѓСЃС‚Р°")]
         [Trait("Priority", "Low")]
         public void GetAllUsers_ShouldReturnEmptyListWhenNoUsers()
         {
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Проверяем, что в базе нет пользователей
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІ Р±Р°Р·Рµ РЅРµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
             var result = realServiceUsers.GetAllUsers();
 
-            // Проверяем, что список пользователей пуст
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РїСѓСЃС‚
             Assert.Empty(result);
         }
 
 
-        [Theory(DisplayName = "Поиск пользователей старше указанного возраста")]
-        [InlineData(25, 2)] // Возраст: 25, ожидаемое количество: 2
-        [InlineData(30, 1)] // Возраст: 30, ожидаемое количество: 1
+        [Theory(DisplayName = "РџРѕРёСЃРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЃС‚Р°СЂС€Рµ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РІРѕР·СЂР°СЃС‚Р°")]
+        [InlineData(25, 2)] // Р’РѕР·СЂР°СЃС‚: 25, РѕР¶РёРґР°РµРјРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ: 2
+        [InlineData(30, 1)] // Р’РѕР·СЂР°СЃС‚: 30, РѕР¶РёРґР°РµРјРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ: 1
         [Trait("Category", "Search")]
         public void SearchUsersMoreAge_ShouldReturnUsersOlderThanGivenAge(int age, int expectedCount)
         {
-            // Создаем новый скоуп для работы с контекстом
+            // РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ СЃРєРѕСѓРї РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј
             using var scope = _serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
-            // Настраиваем мок для метода Add
+            // РќР°СЃС‚СЂР°РёРІР°РµРј РјРѕРє РґР»СЏ РјРµС‚РѕРґР° Add
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
             mockServiceUsers
                 .Setup(service => service.Add(It.IsAny<UserModel>()))
@@ -265,78 +265,78 @@ namespace _1.Tests
 
             var serviceUsers = mockServiceUsers.Object;
 
-            // Добавляем пользователей через мок
+            // Р”РѕР±Р°РІР»СЏРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ С‡РµСЂРµР· РјРѕРє
             serviceUsers.Add(new UserModel { Name = "John", Age = 30 });
             serviceUsers.Add(new UserModel { Name = "Jane", Age = 40 });
             serviceUsers.Add(new UserModel { Name = "Alice", Age = 20 });
 
-            // Получаем реальный сервис для вызова метода поиска
+            // РџРѕР»СѓС‡Р°РµРј СЂРµР°Р»СЊРЅС‹Р№ СЃРµСЂРІРёСЃ РґР»СЏ РІС‹Р·РѕРІР° РјРµС‚РѕРґР° РїРѕРёСЃРєР°
             var realServiceUsers = scope.ServiceProvider.GetRequiredService<IServiceUsers>();
 
-            // Выполняем поиск пользователей старше указанного возраста
+            // Р’С‹РїРѕР»РЅСЏРµРј РїРѕРёСЃРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЃС‚Р°СЂС€Рµ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РІРѕР·СЂР°СЃС‚Р°
             var result = realServiceUsers.SearchUsersMoreAge(age);
 
-            // Проверяем количество найденных пользователей
+            // РџСЂРѕРІРµСЂСЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР°Р№РґРµРЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             Assert.Equal(expectedCount, result.Count);
 
-            // Проверяем, что все найденные пользователи старше указанного возраста
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІСЃРµ РЅР°Р№РґРµРЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃС‚Р°СЂС€Рµ СѓРєР°Р·Р°РЅРЅРѕРіРѕ РІРѕР·СЂР°СЃС‚Р°
             Assert.All(result, user => Assert.True(user.Age > age));
         }
 
-        [Fact(DisplayName = "Поиск пользователей по имени")]
+        [Fact(DisplayName = "РџРѕРёСЃРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РїРѕ РёРјРµРЅРё")]
         [Trait("Priority", "High")]
         public void SearchUsers_ShouldReturnUsersMatchingSearchTerm()
         {
-            // Создаем мок для IServiceUsers и перезаписываем только метод SearchUsers
+            // РЎРѕР·РґР°РµРј РјРѕРє РґР»СЏ IServiceUsers Рё РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµРј С‚РѕР»СЊРєРѕ РјРµС‚РѕРґ SearchUsers
             var mockServiceUsers = new Mock<IServiceUsers>(MockBehavior.Default);
 
-            // Подготавливаем список пользователей
+            // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             var users = new List<UserModel>
             {
                 new UserModel { Name = "John", Age = 30 },
                 new UserModel { Name = "Jane", Age = 25 }
             };
 
-            // Настройка мока для метода SearchUsers
+            // РќР°СЃС‚СЂРѕР№РєР° РјРѕРєР° РґР»СЏ РјРµС‚РѕРґР° SearchUsers
             mockServiceUsers
                 .Setup(service => service.SearchUsers(It.IsAny<string>()))
                 .Returns((string searchTerm) => users.Where(u => u.Name.Contains(searchTerm)).ToList());
 
             var serviceUsers = mockServiceUsers.Object;
 
-            // Вызываем метод SearchUsers с параметром "John"
+            // Р’С‹Р·С‹РІР°РµРј РјРµС‚РѕРґ SearchUsers СЃ РїР°СЂР°РјРµС‚СЂРѕРј "John"
             var result = serviceUsers.SearchUsers("John");
 
-            // Проверяем, что вернулся только один пользователь
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІРµСЂРЅСѓР»СЃСЏ С‚РѕР»СЊРєРѕ РѕРґРёРЅ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
             Assert.Single(result);
             Assert.Equal("John", result[0].Name);
         }
 
-        [Fact(DisplayName = "Поиск пользователя по имени, которого нет в базе")]
+        [Fact(DisplayName = "РџРѕРёСЃРє РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїРѕ РёРјРµРЅРё, РєРѕС‚РѕСЂРѕРіРѕ РЅРµС‚ РІ Р±Р°Р·Рµ")]
         [Trait("Category", "Search")]
         public void SearchUsers_ShouldReturnEmptyListWhenUserNotFound()
         {
-            // Создаем мок для IServiceUsers
+            // РЎРѕР·РґР°РµРј РјРѕРє РґР»СЏ IServiceUsers
             var mockServiceUsers = new Mock<IServiceUsers>();
 
-            // Подготавливаем список пользователей
+            // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             var users = new List<UserModel>
             {
                 new UserModel { Name = "John", Age = 30 },
                 new UserModel { Name = "Jane", Age = 25 }
             };
 
-            // Настроим мок для метода SearchUsers
+            // РќР°СЃС‚СЂРѕРёРј РјРѕРє РґР»СЏ РјРµС‚РѕРґР° SearchUsers
             mockServiceUsers
                 .Setup(service => service.SearchUsers(It.IsAny<string>()))
                 .Returns((string searchTerm) => users.Where(u => u.Name.Contains(searchTerm)).ToList());
 
             var serviceUsers = mockServiceUsers.Object;
 
-            // Ищем пользователя, которого нет в списке
+            // РС‰РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РєРѕС‚РѕСЂРѕРіРѕ РЅРµС‚ РІ СЃРїРёСЃРєРµ
             var result = serviceUsers.SearchUsers("Mike");
 
-            // Проверяем, что вернулся пустой список
+            // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РІРµСЂРЅСѓР»СЃСЏ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє
             Assert.Empty(result);
         }
     }
